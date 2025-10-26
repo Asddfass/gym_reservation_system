@@ -16,7 +16,7 @@ $user = $_SESSION['user'];
 // Get data for dashboard cards
 $totalUsers = count($fn->fetchAll("SELECT * FROM user WHERE role != 'admin'"));
 $totalFacilities = count($fn->fetchAll("SELECT * FROM facility"));
-$totalReservations = count($fn->fetchAll("SELECT * FROM reservation"));
+$totalReservations = count($fn->getReservations());
 $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE status = 'pending'"));
 ?>
 <!DOCTYPE html>
@@ -28,24 +28,25 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
     <title>Admin Dashboard | Gymnasium Reservation System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link href="../css/admin_dashboard.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
 </head>
 
 <body>
-
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="../assets/logo.png" alt="Gym Logo">
+                <img src="../assets/logo.png" alt="Gym Logo" style="height:40px;margin-right:10px;">
                 Admin Dashboard
             </a>
-            <div class="d-flex align-items-center text-white">
+            <div class="d-flex align-items-center text-white ms-auto">
                 <span class="me-3">Welcome, <?= htmlspecialchars($user['name']); ?>!</span>
                 <a href="../index.php" class="btn btn-sm btn-light">Logout</a>
             </div>
         </div>
     </nav>
+
+
 
     <!-- Content -->
     <div class="container py-4">
@@ -86,7 +87,9 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
         <div class="d-flex justify-content-center gap-3 mb-4">
             <a href="manage_reservations.php" class="btn btn-manage px-4">Manage Reservations</a>
             <a href="facilities.php" class="btn btn-manage px-4">Manage Facilities</a>
+            <a href="manage_accounts.php" class="btn btn-manage px-4">Manage Accounts</a>
         </div>
+
 
         <!-- Latest Reservations -->
         <div class="card shadow-sm">
@@ -104,12 +107,7 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
                     </thead>
                     <tbody>
                         <?php
-                        $recent = $fn->fetchAll("SELECT r.*, u.name AS user_name, f.name AS facility_name 
-                FROM reservation r 
-                JOIN user u ON r.user_id = u.user_id 
-                JOIN facility f ON r.facility_id = f.facility_id 
-                ORDER BY r.date DESC, r.start_time DESC 
-                LIMIT 5");
+                        $recent = $fn->getReservations();
 
                         if (!empty($recent)):
                             foreach ($recent as $row):

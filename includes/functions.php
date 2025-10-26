@@ -83,22 +83,25 @@ class Functions
     // Fetch all reservations (with joined info)
     public function getReservations()
     {
-        $sql = "SELECT r.reservation_id AS id,
-                u.name AS user_name,
-                f.name AS facility_name,
-                r.date,
-                r.start_time,
-                r.end_time,
-                r.status
+        $sql = "SELECT r.*, u.name AS user_name, f.name AS facility_name
                 FROM reservation r
-                JOIN user u ON r.user_id = u.id
-                JOIN facility f ON r.facility_id = f.id
-                ORDER BY r.date DESC";
+                JOIN user u ON r.user_id = u.user_id
+                JOIN facility f ON r.facility_id = f.facility_id
+                WHERE r.created_at <= NOW()
+                ORDER BY r.created_at DESC";
 
         return $this->fetchAll($sql);
     }
 
-    
+    // Update a facility
+    public function updateFacility($id, $name, $capacity, $status)
+    {
+        $sql = "UPDATE facility 
+            SET name = ?, capacity = ?, availability_status = ?
+            WHERE facility_id = ?";
+        return $this->execute($sql, [$name, $capacity, $status, $id], "sisi");
+    }
+
 
 
 }

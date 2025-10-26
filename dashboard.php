@@ -14,12 +14,7 @@ $user = $_SESSION['user'];
 $facilities = $fn->getFacilities('available');
 
 // Fetch only the current user's reservations
-$reservations = $fn->fetchAll(" SELECT r.reservation_id, f.name AS facility_name, r.date, r.start_time, r.end_time, r.status
-                                FROM reservation r
-                                JOIN facility f ON r.facility_id = f.facility_id
-                                WHERE r.user_id = ?
-                                ORDER BY r.date DESC
-                                ", [$user['user_id']], "i");
+$reservations = $fn->getReservations();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +32,10 @@ $reservations = $fn->fetchAll(" SELECT r.reservation_id, f.name AS facility_name
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid px-4">
-            <img src="assets/logo.png" alt="Gym Logo" width="36" height="36" class="me-2">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="assets/logo.png" alt="Gym Logo" style="height:40px;margin-right:10px;">
+                Dashboard
+            </a>
             <div class="d-flex align-items-center text-white ms-auto">
                 <span class="me-3">Welcome, <?= htmlspecialchars($user['name']); ?>!</span>
                 <a href="index.php" class="btn btn-sm btn-light">Logout</a>
