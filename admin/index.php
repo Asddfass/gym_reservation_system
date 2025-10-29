@@ -32,6 +32,7 @@ $user = $_SESSION['user'];
         <a href="#" class="nav-link active" data-page="admin_overview.php">Overview</a>
         <a href="#" class="nav-link" data-page="manage_reservations.php">Manage Reservations</a>
         <a href="#" class="nav-link" data-page="manage_facilities.php">Manage Facilities</a>
+        <a href="#" class="nav-link" data-page="admin_reserve.php">Reserve</a>
         <a href="#" class="nav-link" data-page="manage_accounts.php">Manage Accounts</a>
 
         <div class="sidebar-footer">
