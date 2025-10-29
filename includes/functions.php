@@ -88,7 +88,7 @@ class Functions
                 JOIN user u ON r.user_id = u.user_id
                 JOIN facility f ON r.facility_id = f.facility_id
                 WHERE r.created_at <= NOW()
-                ORDER BY r.created_at DESC";
+                ORDER BY r.reservation_id DESC";
 
         return $this->fetchAll($sql);
     }
