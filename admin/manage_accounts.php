@@ -11,23 +11,40 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin')
 
 $fn = new Functions();
 $message = $error = "";
+$current_user_id = $_SESSION['user']['user_id']; // Get the ID of the currently logged-in admin
 
 // Handle Add Account
-if (isset($_POST['add_account'])) {
+if (isset($_POST['add_account'])) 
+{
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
     $role = $_POST['role'];
 
-    if ($name && $email && $password) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $fn->execute(
-            "INSERT INTO user (name, email, password, role) VALUES (?, ?, ?, ?)",
-            [$name, $email, $hashed, $role],
-            "ssss"
-        );
-        $message = "Account added successfully.";
-    } else {
+    if ($name && $email && $password) 
+    {
+        
+        // --- NEW: Check if email already exists ---
+        $existing_user = $fn->fetchOne("SELECT user_id FROM user WHERE email = ?", [$email], "s");
+        
+        if ($existing_user) 
+        {
+            $error = "An account with the email " . htmlspecialchars($email) . " already exists.";
+        } 
+        else 
+        {
+            // --- END NEW CHECK ---
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $fn->execute(
+                "INSERT INTO user (name, email, password, role) VALUES (?, ?, ?, ?)",
+                [$name, $email, $hashed, $role],
+                "ssss"
+            );
+            $message = "Account added successfully.";
+        }
+    } 
+    else 
+    {
         $error = "Please fill in all fields.";
     }
 }
@@ -66,8 +83,14 @@ if (isset($_POST['change_password']))
 if (isset($_GET['delete'])) 
 {
     $id = intval($_GET['delete']);
-    $fn->execute("DELETE FROM user WHERE user_id = ?", [$id], "i");
-    $message = "Account deleted successfully.";
+    
+    // --- SECURITY CHECK: Prevent deletion of the current user ---
+    if ($id === $current_user_id) {
+        $error = "You cannot delete the account you are currently logged in as.";
+    } else {
+        $fn->execute("DELETE FROM user WHERE user_id = ?", [$id], "i");
+        $message = "Account deleted successfully.";
+    }
 }
 
 // Fetch users
@@ -144,6 +167,7 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
                         <tbody>
                             <?php foreach ($accounts as $acc): 
                                 $isEditing = (isset($_POST['edit_mode']) && $_POST['edit_mode'] == $acc['user_id']);
+                                $is_self = $acc['user_id'] == $current_user_id; // Check if this is the current user
                             ?>
                             <tr>
                                 <form method="POST">
@@ -173,7 +197,12 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
                                         <?php else: ?>
                                             <div class="d-flex justify-content-center gap-2">
                                                 <button type="submit" name="edit_mode" value="<?= $acc['user_id'] ?>" class="btn btn-sm btn-manage">Edit</button>
-                                                <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this account?')">Delete</a>
+                                                
+                                                <?php if ($is_self): ?>
+                                                    <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot delete your own account">Delete</button>
+                                                <?php else: ?>
+                                                    <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this account?')">Delete</a>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
                                     </td>
