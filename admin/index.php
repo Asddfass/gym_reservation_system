@@ -3,8 +3,7 @@ session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') 
-{
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../");
     exit();
 }
@@ -13,6 +12,7 @@ $user = $_SESSION['user'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,6 +33,7 @@ $user = $_SESSION['user'];
         <a href="#" class="nav-link" data-page="manage_reservations.php">Manage Reservations</a>
         <a href="#" class="nav-link" data-page="manage_facilities.php">Manage Facilities</a>
         <a href="#" class="nav-link" data-page="admin_reserve.php">Reserve</a>
+        <a href="#" class="nav-link" data-page="admin_reports.php">Reports & Analytics</a>
         <a href="#" class="nav-link" data-page="manage_accounts.php">Manage Accounts</a>
 
         <div class="sidebar-footer">
@@ -61,4 +62,5 @@ $user = $_SESSION['user'];
         });
     </script>
 </body>
+
 </html>
