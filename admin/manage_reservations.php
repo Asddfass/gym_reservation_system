@@ -106,29 +106,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/manage_reservations.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- Custom CSS for Scrollable Table with Sticky Header -->
     <style>
-        /* Container that defines the scrollable area */
-        .table-scroll-wrapper {
-            max-height: 60vh; /* Set a maximum height. Adjust 60vh based on your screen size. */
-            overflow-y: auto; /* Enable vertical scrolling */
-        }
-
-        /* Make the table header sticky inside the scrollable container */
-        .table-scroll-wrapper thead th {
-            position: sticky;
-            top: 0; /* Fixes the header to the top of the scrolling container */
-            z-index: 10;
-            background-color: #f8f9fa; /* Ensures the header background is solid */
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-        }
         
-        /* Ensure the table itself doesn't have bottom margin inside the wrapper */
-        .table-scroll-wrapper table {
-            margin-bottom: 0;
-        }
     </style>
 </head>
 <body>
@@ -189,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                 Reservation Records (<?= count($reservations); ?> Found)
             </div>
             
-            <!-- NEW WRAPPER FOR SCROLLING -->
+            <!-- WRAPPER FOR SCROLLING -->
             <div class="table-scroll-wrapper">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped align-middle mb-0">
@@ -216,7 +198,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                                         <td><?= htmlspecialchars($row['purpose']); ?></td>
                                         <td>
                                             <span class="badge bg-<?=
-                                                match ($row['status']) {
+                                                match ($row['status']) 
+                                                {
                                                     'approved' => 'success',
                                                     'denied' => 'danger',
                                                     'cancelled' => 'secondary',
@@ -254,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                     </table>
                 </div>
             </div>
-            <!-- END NEW WRAPPER FOR SCROLLING -->
+            <!-- WRAPPER FOR SCROLLING -->
         </div>
     </div>
 </div>
