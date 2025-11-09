@@ -44,5 +44,5 @@ VALUES (
   'John Doe',
   'john@example.com',
   'john123',
-  'guest'
+  'faculty'
 );
