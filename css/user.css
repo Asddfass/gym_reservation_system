@@ -1,0 +1,458 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f8f8;
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  margin: 0;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: 250px;
+  background-color: #a4161a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
+  padding-top: 20px;
+  z-index: 10;
+}
+
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-logo {
+  height: 50px;
+  margin-bottom: 10px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.sidebar-logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+
+.sidebar h4 {
+  font-weight: 600;
+  color: #fff;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: 12px 20px;
+  font-weight: 500;
+  transition: background-color 0.2s, padding-left 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #dc143c;
+  padding-left: 25px;
+  border-left: 5px solid #fff;
+}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.sidebar-footer p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.sidebar-footer .btn {
+  background-color: #fff;
+  color: #a4161a;
+  font-weight: 600;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-footer .btn:hover {
+  background-color: #dc143c;
+  color: #fff;
+}
+
+/* ========== MAIN CONTENT ========== */
+.content {
+  margin-left: 250px;
+  padding: 30px;
+  flex-grow: 1;
+  background-color: #fff;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.section {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ========== DASHBOARD CARDS ========== */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  width: 100%;
+}
+
+.card-info {
+  border: none;
+  border-radius: 14px;
+  padding: 25px 20px;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #a4161a, #dc143c);
+}
+
+.bg-crimson {
+  background: linear-gradient(135deg, #dc143c, #ff4c4c) !important;
+}
+
+.bg-darkred {
+  background: linear-gradient(135deg, #7b0f10, #a4161a) !important;
+}
+
+.bg-gray {
+  background: linear-gradient(135deg, #5e5e5e, #808080) !important;
+}
+
+.bg-gold {
+  background: linear-gradient(135deg, #c49b0b, #ffd700) !important;
+  color: #fff;
+}
+
+.card-info:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-info h4 {
+  font-size: 1.6rem;
+  margin-top: 10px;
+}
+
+.card-info p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.card-info i {
+  font-size: 2rem;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+/* ========== TABLE SECTION ========== */
+.user-content {
+  padding: 2rem;
+  width: 100%;
+  background-color: #fff;
+}
+
+.content-header h3 {
+  color: #222;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+/* Style for Card Header (Used in Reservation Form) */
+.card-header {
+  background-color: #a4161a !important; 
+  color: white;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  font-size: 1.05rem;
+  display: flex; /* Added for icon alignment in reserve_facility.php */
+  align-items: center;
+  gap: 10px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.table th, .table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.table thead th {
+  background-color: #f8f8f8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.85rem;
+}
+
+.table tbody tr:hover {
+  background-color: #fff1f3;
+}
+
+/* ========== BUTTONS ========== */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 8px 14px;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-primary { background-color: #dc143c; }
+.btn-primary:hover { background-color: #b3122f; transform: translateY(-2px); }
+
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary:hover { background-color: #5a6268; transform: translateY(-2px); }
+
+.btn-danger { background-color: #c82333; }
+.btn-danger:hover { background-color: #a4161a; transform: translateY(-2px); }
+
+/* Unified Submit/Manage Button Style */
+.btn-darkred, .btn-submit, .btn-manage {
+  background: linear-gradient(135deg, #a4161a, #dc143c);
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-darkred:hover, .btn-submit:hover, .btn-manage:hover {
+  background: linear-gradient(135deg, #b3122f, #dc143c);
+  transform: translateY(-2px);
+}
+
+
+/* ========== UTILITIES ========== */
+.text-muted { color: #777 !important; font-style: italic; }
+
+iframe {
+  border: none;
+  width: 100%;
+  height: 85vh;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    box-shadow: none;
+  }
+  .content, .user-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+  .dashboard-container, .overview-container, .facility-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-container, .overview-container, .facility-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== MODALS / FORMS (Existing) ========== */
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #a4161a;
+  color: #fff;
+  font-weight: 600;
+  border-bottom: none;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  background-color: #fff;
+}
+
+.modal-footer {
+  border-top: none;
+  background-color: #f8f8f8;
+  padding: 1rem 1.5rem;
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  outline: none;
+  border-color: #a4161a;
+  box-shadow: 0 0 5px rgba(164, 22, 26, 0.3);
+}
+
+/* ========== FORM STYLING (General and Enhanced) ========== */
+form .form-label {
+  font-weight: 500;
+}
+
+/* Base style for all form controls (unifying height and depth) */
+form input, 
+form select, 
+form textarea,
+form .form-control,
+form .form-select {
+  /* Common styles from your existing code */
+  width: 100%;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+
+  /* NEW ENHANCEMENTS */
+  height: 48px; /* Standardizing height */
+  padding: 10px 12px;
+  border-radius: 8px; /* Slightly more rounded corners */
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Soft, subtle shadow */
+}
+
+/* Focus state for all inputs/selects: Keep consistent red highlight */
+form input:focus, 
+form select:focus, 
+form textarea:focus {
+  outline: none;
+  border-color: #a4161a;
+  box-shadow: 0 0 5px rgba(164, 22, 26, 0.3);
+}
+
+/* Style for Dropdowns (Selects) */
+form .form-select {
+  /* Ensures the custom arrow or selector is styled nicely */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 12px;
+}
+
+/* Style for Date Input (Calendar Icon) */
+form input[type="date"] {
+  cursor: pointer;
+  background-color: #fff;
+}
+
+/* Disabled Field Style for clarity */
+form input:disabled,
+form select:disabled {
+  background-color: #e9ecef !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: #777;
+}
+
+/* Ensure the content area allows for vertical growth if not in an iframe */
+.user-content {
+    /* If this page is NOT in an iframe, this ensures the content can grow */
+    min-height: 100vh;
+    padding-bottom: 50px; /* Extra padding at the bottom */
+}
+
+/* Adjust the Card Body to be the Scrollable Element */
+.card-body.table-responsive {
+    /* Set a fixed maximum height that looks good on your screen */
+    max-height: 450px; /* You can adjust this value (e.g., 400px, 600px) */
+    
+    /* Crucial: Enable vertical scrolling when content exceeds the max-height */
+    overflow-y: auto; 
+    
+    /* Ensure horizontal scrolling is handled if table is wide */
+    overflow-x: auto; 
+    
+    /* Remove padding from the container itself */
+    padding: 0;
+}
+
+/* Re-apply padding to table cells */
+.card-body.table-responsive .table th, 
+.card-body.table-responsive .table td {
+    padding: 14px 16px; 
+}
+
+/* Fix table header position during scroll */
+.card-body.table-responsive .table thead {
+    /* Sticky header ensures the titles stay visible */
+    position: sticky;
+    top: 0; /* Stick to the top of the scroll container */
+    z-index: 2; /* Keep it above the scrolling rows */
+    background-color: #f8f8f8; /* Ensures the header background is solid */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
