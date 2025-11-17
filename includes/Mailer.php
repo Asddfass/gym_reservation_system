@@ -164,5 +164,92 @@ class Mailer
             return false;
         }
     }
+
+    public function sendAdminNotificationEmail($to, $adminName, $reservationDetails)
+    {
+        try {
+            $this->mail->clearAddresses();
+            $this->mail->addAddress($to, $adminName);
+            
+            $this->mail->Subject = "New Reservation Request - Action Required";
+            
+            $body = "
+            
+            
+            
+                
+                    body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    .header { background: linear-gradient(135deg, #a4161a, #dc143c); color: white; padding: 30px 20px; text-align: center; }
+                    .header h1 { margin: 0; font-size: 24px; }
+                    .content { padding: 30px 20px; }
+                    .alert-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+                    .details { background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
+                    .detail-row { padding: 8px 0; border-bottom: 1px solid #dee2e6; }
+                    .detail-row:last-child { border-bottom: none; }
+                    .detail-label { font-weight: bold; color: #495057; }
+                    .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+                    .button { display: inline-block; padding: 12px 24px; background: #dc143c; color: white; text-decoration: none; border-radius: 4px; margin-top: 15px; }
+                
+            
+            
+                
+                    
+                        🔔 New Reservation Request
+                    
+                    
+                        
+                            ⚠️ Action Required: A new reservation request needs your review.
+                        
+                        
+                        Hello {$adminName},
+                        A new reservation has been submitted and is pending your approval.
+                        
+                        
+                            
+                                Requested by: {$reservationDetails['user_name']}
+                            
+                            
+                                Facility: {$reservationDetails['facility']}
+                            
+                            
+                                Date: {$reservationDetails['date']}
+                            
+                            
+                                Time: {$reservationDetails['start_time']} - {$reservationDetails['end_time']}
+                            
+                            
+                                Purpose: {$reservationDetails['purpose']}
+                            
+                        
+                        
+                        
+                            
+                                Review Reservation
+                            
+                        
+                        
+                        
+                            Please log in to your admin panel to approve or deny this request.
+                        
+                    
+                    
+                        &copy; 2024 Gymnasium Reservation System. All rights reserved.
+                    
+                
+            
+            
+            ";
+            
+            $this->mail->Body = $body;
+            $this->mail->AltBody = "New reservation request from {$reservationDetails['user_name']} for {$reservationDetails['facility']} on {$reservationDetails['date']} at {$reservationDetails['start_time']} - {$reservationDetails['end_time']}. Purpose: {$reservationDetails['purpose']}";
+            
+            $this->mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Admin notification email could not be sent. Error: {$this->mail->ErrorInfo}");
+            return false;
+        }
+    }
 }
 ?>

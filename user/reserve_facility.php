@@ -2,6 +2,8 @@
 session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
+include '../includes/NotificationManager.php';
+include '../includes/Mailer.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin') 
 {
@@ -11,6 +13,8 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin')
 
 $user = $_SESSION['user'];
 $func = new Functions();
+$notifManager = new NotificationManager();
+$mailer = new Mailer();
 $message = $error = "";
 
 // --- AJAX Endpoint to fetch booked slots ---
@@ -31,7 +35,6 @@ if (isset($_GET['booked_times']) && isset($_GET['facility_id']) && isset($_GET['
     echo json_encode($booked_slots);
     exit;
 }
-// ------------------------------------------
 
 // Preserve previous values
 $prev = [
@@ -65,9 +68,8 @@ $start_time_slots = array_filter($time_slots, function($time)
 {
     return $time >= '06:00' && $time <= '16:00';
 });
-// ------------------------------------------
 
-// Handle reservation submission (Server-side validation remains the ultimate safeguard)
+// Handle reservation submission
 if (isset($_POST['reserve'])) 
 {
     $prev['facility_id'] = intval($_POST['facility_id']);
@@ -101,6 +103,7 @@ if (isset($_POST['reserve']))
 
         if (!$conflict_found) 
         {
+            // Insert reservations
             for ($i = 0; $i < $prev['duration']; $i++) 
             {
                 $res_date = date('Y-m-d', strtotime($prev['date'] . " +$i days"));
@@ -111,7 +114,49 @@ if (isset($_POST['reserve']))
                     "iissss"
                 );
             }
-            $message = "Reservation submitted successfully for {$prev['duration']} day(s)!";
+            
+            // Get facility name
+            $facility = $func->fetchOne(
+                "SELECT name FROM facility WHERE facility_id = ?",
+                [$prev['facility_id']],
+                "i"
+            );
+            
+            // Notify all admins about new reservation
+            $admins = $func->fetchAll("SELECT user_id, email, name FROM user WHERE role = 'admin'");
+            
+            foreach ($admins as $admin) {
+                // Create in-app notification for admin
+                $notifManager->createNotification(
+                    $admin['user_id'],
+                    '📋 New Reservation Request',
+                    "{$user['name']} has requested to reserve {$facility['name']} on " . date('M d, Y', strtotime($prev['date'])) . " from " . date('h:i A', strtotime($prev['start_time'])) . " to " . date('h:i A', strtotime($prev['end_time'])),
+                    'info',
+                    'manage_reservations.php'
+                );
+                
+                // Send email to admin
+                try {
+                    $reservationDetails = [
+                        'facility' => $facility['name'],
+                        'date' => date('F d, Y', strtotime($prev['date'])),
+                        'start_time' => date('h:i A', strtotime($prev['start_time'])),
+                        'end_time' => date('h:i A', strtotime($prev['end_time'])),
+                        'purpose' => $prev['purpose'],
+                        'user_name' => $user['name']
+                    ];
+                    
+                    $mailer->sendAdminNotificationEmail(
+                        $admin['email'],
+                        $admin['name'],
+                        $reservationDetails
+                    );
+                } catch (Exception $e) {
+                    error_log("Failed to send admin notification email: " . $e->getMessage());
+                }
+            }
+            
+            $message = "Reservation submitted successfully for {$prev['duration']} day(s)! Admins have been notified.";
             $prev = ['facility_id' => '', 'date' => '', 'start_time' => '', 'end_time' => '', 'purpose' => '', 'duration' => 1];
         }
     } 
@@ -132,15 +177,12 @@ if (isset($_POST['reserve']))
     <link href="../css/user.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- Scrollbar Fix: Prevents body/html from showing a scrollbar for minor overflows -->
     <style>
         html, body {
             overflow-y: hidden; 
         }
-        /* Allow the main content area to scroll if its internal content overflows */
         .user-content {
             overflow-y: auto;
-            /* Maximize height available within the frame/layout (adjust 90px if header/footer exists) */
             max-height: 100vh;
         }
     </style>
@@ -158,7 +200,6 @@ if (isset($_POST['reserve']))
         <div class="alert alert-danger"><?= $error ?></div>
     <?php endif; ?>
 
-    <!-- Removed h-100 class to avoid height calculation issues -->
     <div class="card shadow-sm">
         <div class="card-header bg-white fw-semibold">
             <i class="bi bi-calendar-plus"></i> Reservation Form
@@ -227,12 +268,10 @@ const durationInput = document.getElementById('duration');
 const startTimeSelect = document.getElementById('start_time');
 const endTimeSelect = document.getElementById('end_time');
 
-// Retrieve the full list of allowed start times from the populated dropdown options
 const allStartTimes = Array.from(startTimeSelect.options).map(o => o.value).filter(v => v);
 const prevStartTime = '<?= htmlspecialchars($prev['start_time']) ?>';
 const prevEndTime = '<?= htmlspecialchars($prev['end_time']) ?>';
 
-// --- Function to build the FULL time slots array (06:00 to 20:00) in JS for End Time population ---
 function getFullTimeSlots() 
 {
     let slots = [];
@@ -250,24 +289,19 @@ function getFullTimeSlots()
 }
 const fullTimeSlots = getFullTimeSlots();
 
-
-// --- 1. Filter and Populate Start Times (Checks conflicts against existing bookings) ---
 function updateStartTimes() {
     const facilityId = facilitySelect.value;
     const date = dateInput.value;
     
-    // Reset and Populate Start Times to default (06:00-16:00)
     startTimeSelect.innerHTML = '<option value="">-- Select Start Time --</option>';
     allStartTimes.forEach(time => {
         const opt = new Option(time, time);
         startTimeSelect.appendChild(opt);
     });
     
-    // Disable End Time selection
     endTimeSelect.innerHTML = '<option value="">-- Select End Time --</option>';
     endTimeSelect.disabled = true;
     
-    // Conditional Enabling/Disabling based on selection
     const isReady = facilityId && date;
     
     if (!isReady) 
@@ -278,21 +312,17 @@ function updateStartTimes() {
     
     startTimeSelect.disabled = false;
 
-    // Fetch Booked Slots to determine available START times
     fetch(`reserve_facility.php?booked_times=1&facility_id=${facilityId}&date=${date}`)
         .then(res => res.json())
         .then(bookedSlots => {
-            // Loop through existing bookings
             bookedSlots.forEach(slot => {
                 const bookingStart = slot.start_time;
                 const bookingEnd = slot.end_time;
                 
-                // Check every possible START time option
                 Array.from(startTimeSelect.options).forEach(opt => {
                     const checkTime = opt.value;
                     if (!checkTime) return;
 
-                    // If checkTime falls inside an existing booking range (start inclusive, end exclusive)
                     if (checkTime >= bookingStart && checkTime < bookingEnd) 
                     {
                         opt.disabled = true;
@@ -300,30 +330,25 @@ function updateStartTimes() {
                 });
             });
             
-            // Re-select previous start time if it's still available
             if (prevStartTime) {
                 const opt = startTimeSelect.querySelector(`option[value="${prevStartTime}"]`);
                 if (opt && !opt.disabled) 
                 {
                     opt.selected = true;
-                    // If the form previously failed validation, re-run end time update
                     if (prevEndTime) updateEndTimes();
                 }
             }
         })
         .catch(error => {
-            console.error('Error fetching booked times for Start Time filtering:', error);
+            console.error('Error fetching booked times:', error);
         });
 }
 
-
-// --- 2. Filter and Populate End Times (Only shows available times) ---
 function updateEndTimes() {
     const facilityId = facilitySelect.value;
     const date = dateInput.value;
     const startTime = startTimeSelect.value;
 
-    // Reset End Time
     endTimeSelect.innerHTML = '<option value="">-- Select End Time --</option>';
 
     if (!startTime) 
@@ -336,7 +361,6 @@ function updateEndTimes() {
     
     if (!facilityId || !date) 
     {
-        // Populate with all possible times > startTime, if AJAX can't run
         const fallbackTimes = fullTimeSlots.filter(t => t > startTime);
         fallbackTimes.forEach(t => {
             const opt = new Option(t, t);
@@ -346,19 +370,16 @@ function updateEndTimes() {
         return; 
     }
 
-    // Fetch Booked Slots to determine available END times
     fetch(`reserve_facility.php?booked_times=1&facility_id=${facilityId}&date=${date}`)
         .then(res => res.json())
         .then(bookedSlots => {
             let earliestConflictEnd = null;
 
-            // Find the earliest existing booking that starts AFTER the user's selected start time.
             bookedSlots.forEach(slot => {
                 const bookingStart = slot.start_time;
                 
                 if (bookingStart > startTime) 
                 {
-                    // Update earliestConflictEnd to the earliest start time we find
                     if (!earliestConflictEnd || bookingStart < earliestConflictEnd) 
                     {
                         earliestConflictEnd = bookingStart;
@@ -366,18 +387,15 @@ function updateEndTimes() {
                 }
             });
             
-            // Filter the full time slots array for available times
             const availableEndTimes = fullTimeSlots
-                .filter(t => t > startTime) // 1. Must be after the selected start time
+                .filter(t => t > startTime)
                 .filter(t => {
-                    // 2. Must be BEFORE the earliest conflicting booking's start time
                     if (earliestConflictEnd) {
                         return t < earliestConflictEnd;
                     }
                     return true;
                 });
                 
-            // Populate the dropdown with ONLY the available times
             availableEndTimes.forEach(t => {
                 const opt = new Option(t, t);
                 if (t === prevEndTime) opt.selected = true;
@@ -385,8 +403,7 @@ function updateEndTimes() {
             });
         })
         .catch(error => {
-            console.error('Error fetching booked times for End Time filtering:', error);
-            // Fallback: If fetch fails, populate with all times > startTime
+            console.error('Error fetching booked times:', error);
             const fallbackTimes = fullTimeSlots.filter(t => t > startTime);
             fallbackTimes.forEach(t => {
                 const opt = new Option(t, t);
@@ -396,14 +413,11 @@ function updateEndTimes() {
         });
 }
 
-// --- 3. Cascading Form Logic and Event Listeners ---
-
 function updateFormDependencies() 
 {
     const facilityId = facilitySelect.value;
     const date = dateInput.value;
 
-    // A. Facility -> Date/Duration
     if (facilityId) 
     {
         dateInput.disabled = false;
@@ -413,7 +427,6 @@ function updateFormDependencies()
     {
         dateInput.disabled = true;
         durationInput.disabled = true;
-        // Reset and disable subsequent fields
         dateInput.value = '';
         startTimeSelect.disabled = true;
         endTimeSelect.disabled = true;
@@ -422,7 +435,6 @@ function updateFormDependencies()
         return;
     }
 
-    // B. Date -> Start Time (and trigger start time filtering)
     if (date) 
     {
         updateStartTimes(); 
@@ -436,17 +448,14 @@ function updateFormDependencies()
     }
 }
 
-// Event listeners
 facilitySelect.addEventListener('change', updateFormDependencies);
 dateInput.addEventListener('change', updateFormDependencies);
 startTimeSelect.addEventListener('change', updateEndTimes);
 
-// Initial call to set up the form state based on previous values (if any)
 updateFormDependencies(); 
 const prevStartOpt = startTimeSelect.querySelector(`option[value="${prevStartTime}"]`);
 if (prevStartOpt && prevStartOpt.selected) 
 {
-    // Only run endTimes update if the previously selected start time is still active
     updateEndTimes(); 
 }
 </script>
