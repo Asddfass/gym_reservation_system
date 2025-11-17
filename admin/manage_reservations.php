@@ -2,6 +2,8 @@
 session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
+include '../includes/NotificationManager.php';
+include '../includes/Mailer.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') 
 {
@@ -10,6 +12,8 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin')
 }
 
 $fn = new Functions();
+$notifManager = new NotificationManager();
+$mailer = new Mailer();
 
 // --- 1. FILTER AND SEARCH HANDLING ---
 $search_user = $_GET['user'] ?? '';
@@ -19,7 +23,7 @@ $filter_status = $_GET['status'] ?? '';
 
 // Build the dynamic SQL query
 $sql = "
-    SELECT r.*, u.name AS user_name, f.name AS facility_name
+    SELECT r.*, u.name AS user_name, u.email AS user_email, f.name AS facility_name
     FROM reservation r
     JOIN user u ON r.user_id = u.user_id
     JOIN facility f ON r.facility_id = f.facility_id
@@ -70,7 +74,7 @@ $reservations = $fn->fetchAll($sql, $params, $types);
 // Fetch available statuses for the filter dropdown
 $statuses = ['all', 'pending', 'approved', 'denied', 'cancelled'];
 
-// Handle approve/deny/cancel actions
+// Handle approve/deny/cancel actions with email and notifications
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'])) {
     $reservation_id = $_POST['id'];
     $action = $_POST['action'];
@@ -85,11 +89,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
     }
 
     if ($status) {
-        $fn->execute(
-            "UPDATE reservation SET status = ? WHERE reservation_id = ?",
-            [$status, $reservation_id],
-            "si"
+        // Get reservation details for email
+        $reservation = $fn->fetchOne(
+            "SELECT r.*, u.name, u.email, f.name as facility_name 
+             FROM reservation r 
+             JOIN user u ON r.user_id = u.user_id 
+             JOIN facility f ON r.facility_id = f.facility_id 
+             WHERE r.reservation_id = ?",
+            [$reservation_id],
+            "i"
         );
+        
+        if ($reservation) {
+            // Update status
+            $fn->execute(
+                "UPDATE reservation SET status = ? WHERE reservation_id = ?",
+                [$status, $reservation_id],
+                "si"
+            );
+            
+            // Send email notification
+            $reservationDetails = [
+                'facility' => $reservation['facility_name'],
+                'date' => date('F d, Y', strtotime($reservation['date'])),
+                'start_time' => date('h:i A', strtotime($reservation['start_time'])),
+                'end_time' => date('h:i A', strtotime($reservation['end_time'])),
+                'purpose' => $reservation['purpose']
+            ];
+            
+            $mailer->sendReservationEmail(
+                $reservation['email'],
+                $reservation['name'],
+                $reservationDetails,
+                $status
+            );
+            
+            // Create in-app notification
+            $notifManager->notifyReservationStatus(
+                $reservation['user_id'],
+                $status,
+                $reservation['facility_name'],
+                date('M d, Y', strtotime($reservation['date'])),
+                date('h:i A', strtotime($reservation['start_time'])) . ' - ' . date('h:i A', strtotime($reservation['end_time']))
+            );
+        }
+        
         // Important: Redirect back to the page with existing filters intact
         header("Location: " . $_SERVER['PHP_SELF'] . "?" . http_build_query($_GET));
         exit();
@@ -108,30 +152,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
     <link href="../css/admin.css" rel="stylesheet">
     <link href="../css/manage_reservations.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-    <style>
-        
-    </style>
 </head>
 <body>
 
 <div class="admin-content px-4 py-4">
     <div class="content-header d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-semibold text-dark mb-0">Manage Reservations</h2>
+        <div>
+            <h2 class="fw-semibold text-dark mb-0">Manage Reservations</h2>
+            <p class="text-muted mb-0 mt-1">Review and manage facility reservation requests</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge bg-primary px-3 py-2"><?= count($reservations) ?> Total</span>
+            <?php 
+            $pending_count = count(array_filter($reservations, fn($r) => $r['status'] === 'pending'));
+            if ($pending_count > 0): 
+            ?>
+                <span class="badge bg-warning text-dark px-3 py-2"><?= $pending_count ?> Pending</span>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom">
+            <i class="bi bi-funnel-fill"></i> Filter & Search
+        </div>
         <div class="card-body">
             <form method="GET" class="row g-3 align-items-end">
                 
                 <div class="col-lg-3 col-md-6">
                     <label for="user" class="form-label">Search User Name</label>
-                    <input type="text" name="user" id="user" class="form-control" placeholder="E.g., John Doe" value="<?= htmlspecialchars($search_user); ?>">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                        <input type="text" name="user" id="user" class="form-control" placeholder="E.g., John Doe" value="<?= htmlspecialchars($search_user); ?>">
+                    </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
                     <label for="facility" class="form-label">Search Facility Name</label>
-                    <input type="text" name="facility" id="facility" class="form-control" placeholder="E.g., Court A" value="<?= htmlspecialchars($search_facility); ?>">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-building"></i></span>
+                        <input type="text" name="facility" id="facility" class="form-control" placeholder="E.g., Court A" value="<?= htmlspecialchars($search_facility); ?>">
+                    </div>
                 </div>
 
                 <div class="col-lg-2 col-md-4">
@@ -144,31 +205,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                     <select name="status" id="status" class="form-select">
                         <option value="all">-- All Statuses --</option>
                         <?php foreach ($statuses as $status): ?>
-                            <option value="<?= $status ?>" <?= $filter_status === $status ? 'selected' : '' ?>>
-                                <?= ucfirst($status) ?>
-                            </option>
+                            <?php if ($status !== 'all'): ?>
+                                <option value="<?= $status ?>" <?= $filter_status === $status ? 'selected' : '' ?>>
+                                    <?= ucfirst($status) ?>
+                                </option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="col-lg-2 col-md-4 d-grid gap-2">
-                    <button type="submit" class="btn btn-submit">
-                        <i class="bi bi-search"></i> Filter
+                    <button type="submit" class="btn btn-darkred">
+                        <i class="bi bi-search"></i> Apply Filters
                     </button>
                 </div>
             </form>
             <?php if ($search_user || $search_facility || $filter_date || ($filter_status && $filter_status !== 'all')): ?>
                 <div class="mt-3">
-                    <span class="text-muted">Showing results for current filters.</span>
-                    <a href="manage_reservations.php" class="btn btn-sm btn-secondary ms-2">Clear Filters</a>
+                    <span class="text-muted"><i class="bi bi-info-circle"></i> Active filters applied</span>
+                    <a href="manage_reservations.php" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="bi bi-x-circle"></i> Clear All
+                    </a>
                 </div>
             <?php endif; ?>
         </div>
     </div>
+    
     <div class="content-body">
         <div class="card shadow-sm">
-            <div class="card-header bg-darkred text-white fw-semibold">
-                Reservation Records (<?= count($reservations); ?> Found)
+            <div class="card-header">
+                <i class="bi bi-list-task"></i> Reservation Records (<?= count($reservations); ?> Found)
             </div>
             
             <!-- WRAPPER FOR SCROLLING -->
@@ -177,24 +243,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                     <table class="table table-hover table-striped align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>User</th>
-                                <th>Facility</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Purpose</th>
-                                <th>Status</th>
-                                <th>Created At</th>
-                                <th class="text-center">Actions</th>
+                                <th><i class="bi bi-person-badge"></i> User</th>
+                                <th><i class="bi bi-building"></i> Facility</th>
+                                <th><i class="bi bi-calendar"></i> Date</th>
+                                <th><i class="bi bi-clock"></i> Time</th>
+                                <th><i class="bi bi-chat-left-text"></i> Purpose</th>
+                                <th><i class="bi bi-tag"></i> Status</th>
+                                <th><i class="bi bi-calendar-check"></i> Created</th>
+                                <th class="text-center"><i class="bi bi-gear"></i> Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($reservations)): ?>
                                 <?php foreach ($reservations as $row): ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($row['user_name']); ?></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle me-2">
+                                                    <?= strtoupper(substr($row['user_name'], 0, 1)) ?>
+                                                </div>
+                                                <?= htmlspecialchars($row['user_name']); ?>
+                                            </div>
+                                        </td>
                                         <td><?= htmlspecialchars($row['facility_name']); ?></td>
-                                        <td><?= htmlspecialchars($row['date']); ?></td>
-                                        <td><?= htmlspecialchars($row['start_time']); ?> - <?= htmlspecialchars($row['end_time']); ?></td>
+                                        <td><?= date('M d, Y', strtotime($row['date'])); ?></td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                <?= date('h:i A', strtotime($row['start_time'])); ?> - <?= date('h:i A', strtotime($row['end_time'])); ?>
+                                            </span>
+                                        </td>
                                         <td><?= htmlspecialchars($row['purpose']); ?></td>
                                         <td>
                                             <span class="badge bg-<?=
@@ -206,31 +283,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                                                     default => 'warning'
                                                 };
                                             ?>">
+                                                <i class="bi bi-<?=
+                                                    match ($row['status']) 
+                                                    {
+                                                        'approved' => 'check-circle',
+                                                        'denied' => 'x-circle',
+                                                        'cancelled' => 'dash-circle',
+                                                        default => 'clock'
+                                                    };
+                                                ?>"></i>
                                                 <?= ucfirst($row['status']); ?>
                                             </span>
                                         </td>
-                                        <td><?= date("Y-m-d", strtotime($row['created_at'])); ?></td>
+                                        <td><?= date("M d, Y", strtotime($row['created_at'])); ?></td>
                                         <td class="text-center">
                                             <?php if ($row['status'] === 'pending'): ?>
                                                 <form method="POST" action="" class="d-inline">
                                                     <input type="hidden" name="id" value="<?= $row['reservation_id']; ?>">
-                                                    <button name="action" value="approve" class="btn btn-sm btn-approve me-1">Approve</button>
-                                                    <button name="action" value="deny" class="btn btn-sm btn-deny">Deny</button>
+                                                    <button name="action" value="approve" class="btn btn-sm btn-approve me-1" title="Approve this reservation">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </button>
+                                                    <button name="action" value="deny" class="btn btn-sm btn-deny" title="Deny this reservation">
+                                                        <i class="bi bi-x-lg"></i> Deny
+                                                    </button>
                                                 </form>
                                             <?php elseif ($row['status'] === 'approved'): ?>
                                                 <form method="POST" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this APPROVED reservation?');">
                                                     <input type="hidden" name="id" value="<?= $row['reservation_id']; ?>" >
-                                                    <button name="action" value="cancel" class="btn btn-sm btn-cancel">Cancel</button>
+                                                    <button name="action" value="cancel" class="btn btn-sm btn-cancel" title="Cancel this reservation">
+                                                        <i class="bi bi-x-circle"></i> Cancel
+                                                    </button>
                                                 </form>
                                             <?php else: ?>
-                                                <em class="text-muted">No actions</em>
+                                                <span class="badge bg-light text-muted">No actions available</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-3">No reservations found matching the current filters.</td>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+                                        <p class="mt-2">No reservations found matching the current filters.</p>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -241,6 +336,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
         </div>
     </div>
 </div>
+
+<style>
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a4161a, #dc143c);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.input-group-text {
+    border: 2px solid #e9ecef;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--primary-red);
+}
+
+.badge i {
+    font-size: 0.8rem;
+}
+</style>
 
 </body>
 </html>

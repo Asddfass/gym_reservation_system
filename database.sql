@@ -31,6 +31,18 @@ CREATE TABLE reservation (
   FOREIGN KEY (facility_id) REFERENCES facility(facility_id)
 );
 
+CREATE TABLE IF NOT EXISTS notification (
+  notification_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  type ENUM('success', 'error', 'warning', 'info') DEFAULT 'info',
+  link VARCHAR(255) DEFAULT NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+);
+
 INSERT INTO user (name, email, password, role)
 VALUES (
   'Administrator',
