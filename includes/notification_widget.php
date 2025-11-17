@@ -55,29 +55,29 @@ $user_id = $_SESSION['user']['user_id'];
 }
 
 .notification-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 360px;
+    position: fixed; /* Changed from absolute to fixed */
+    top: auto;
+    right: 20px; /* Position from right edge */
+    bottom: 80px; /* Position from bottom */
+    width: 380px;
     max-height: 500px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
     display: none;
-    z-index: 1000;
-    margin-top: 0.5rem;
+    z-index: 9999; /* Increased z-index */
     overflow: hidden;
 }
 
 .notification-dropdown.show {
     display: block;
-    animation: slideDown 0.3s ease;
+    animation: slideUp 0.3s ease;
 }
 
-@keyframes slideDown {
+@keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -113,6 +113,7 @@ $user_id = $_SESSION['user']['user_id'];
     display: flex;
     gap: 1rem;
     align-items: start;
+    background: white;
 }
 
 .notification-item:hover {
@@ -205,12 +206,31 @@ $user_id = $_SESSION['user']['user_id'];
     padding: 3rem 1.25rem;
     text-align: center;
     color: #a0aec0;
+    background: white;
 }
 
 .notification-empty i {
     font-size: 3rem;
     margin-bottom: 1rem;
     opacity: 0.5;
+}
+
+/* Scrollbar for notification list */
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 </style>
 
@@ -235,7 +255,7 @@ $user_id = $_SESSION['user']['user_id'];
         </div>
         
         <div class="notification-footer">
-            <a href="<?= isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin' ? '../user/notifications.php' : 'notifications.php' ?>">View all notifications</a>
+            <a href="<?= isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin' ? 'notifications.php' : 'notifications.php' ?>" target="content-frame">View all notifications</a>
         </div>
     </div>
 </div>
@@ -258,7 +278,7 @@ notificationBell.addEventListener('click', function(e) {
 
 // Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
-    if (!notificationBell.contains(e.target)) {
+    if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
         notificationDropdown.classList.remove('show');
     }
 });
@@ -390,5 +410,5 @@ function markAllAsRead() {
 
 // Load notification count on page load and refresh every 30 seconds
 loadNotificationCount();
-setInterval(loadNotificationCount, 30000);
+setInterval(loadNotificationCount, 10000);
 </script>

@@ -1,6 +1,6 @@
 <?php
 require '../vendor/autoload.php';
-require_once 'config.php'; // ← ADD THIS LINE
+require_once 'config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -175,10 +175,10 @@ class Mailer
             $this->mail->Subject = "New Reservation Request - Action Required";
             
             $body = "
-            
-            
-            
-                
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
                     body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                     .header { background: linear-gradient(135deg, #a4161a, #dc143c); color: white; padding: 30px 20px; text-align: center; }
@@ -191,55 +191,53 @@ class Mailer
                     .detail-label { font-weight: bold; color: #495057; }
                     .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
                     .button { display: inline-block; padding: 12px 24px; background: #dc143c; color: white; text-decoration: none; border-radius: 4px; margin-top: 15px; }
-                
-            
-            
-                
-                    
-                        🔔 New Reservation Request
-                    
-                    
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>🔔 New Reservation Request</h1>
+                    </div>
+                    <div class='content'>
+                        <div class='alert-box'>
+                            <strong>⚠️ Action Required:</strong> A new reservation request needs your review.
+                        </div>
                         
-                            ⚠️ Action Required: A new reservation request needs your review.
+                        <p>Hello <strong>{$adminName}</strong>,</p>
+                        <p>A new reservation has been submitted and is pending your approval.</p>
                         
+                        <div class='details'>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Requested by:</span> {$reservationDetails['user_name']}
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Facility:</span> {$reservationDetails['facility']}
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Date:</span> {$reservationDetails['date']}
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Time:</span> {$reservationDetails['start_time']} - {$reservationDetails['end_time']}
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Purpose:</span> {$reservationDetails['purpose']}
+                            </div>
+                        </div>
                         
-                        Hello {$adminName},
-                        A new reservation has been submitted and is pending your approval.
+                        <p style='text-align: center;'>
+                            <a href='#http://localhost/gym_reservation_system/admin/' class='button'>Review Reservation</a>
+                        </p>
                         
-                        
-                            
-                                Requested by: {$reservationDetails['user_name']}
-                            
-                            
-                                Facility: {$reservationDetails['facility']}
-                            
-                            
-                                Date: {$reservationDetails['date']}
-                            
-                            
-                                Time: {$reservationDetails['start_time']} - {$reservationDetails['end_time']}
-                            
-                            
-                                Purpose: {$reservationDetails['purpose']}
-                            
-                        
-                        
-                        
-                            
-                                Review Reservation
-                            
-                        
-                        
-                        
+                        <p style='margin-top: 20px; color: #6c757d; font-size: 14px;'>
                             Please log in to your admin panel to approve or deny this request.
-                        
-                    
-                    
-                        &copy; 2024 Gymnasium Reservation System. All rights reserved.
-                    
-                
-            
-            
+                        </p>
+                    </div>
+                    <div class='footer'>
+                        <p>&copy; 2024 Gymnasium Reservation System. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
             ";
             
             $this->mail->Body = $body;

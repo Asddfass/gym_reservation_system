@@ -47,6 +47,9 @@ $user = $_SESSION['user'];
             <a href="#" class="nav-link" data-page="admin_reports.php">
                 <i class="bi bi-graph-up"></i> Reports & Analytics
             </a>
+            <a href="#" class="nav-link" data-page="notifications.php">
+                <i class="bi bi-bell"></i> Notifications
+            </a>
             <a href="#" class="nav-link" data-page="manage_accounts.php">
                 <i class="bi bi-people"></i> Manage Accounts
             </a>
@@ -68,7 +71,7 @@ $user = $_SESSION['user'];
 
     <!-- Dynamic Content Area -->
     <div class="content">
-        <iframe id="content-frame" src="admin_overview.php" frameborder="0" width="100%" height="100%" style="min-height: 100vh;"></iframe>
+        <iframe id="content-frame" name="content-frame" src="admin_overview.php" frameborder="0" width="100%" height="100%" style="min-height: 100vh;"></iframe>
     </div>
 
     <script>
