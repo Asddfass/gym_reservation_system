@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                 "si"
             );
             
-            // Send email notification
+            // Prepare reservation details for email
             $reservationDetails = [
                 'facility' => $reservation['facility_name'],
                 'date' => date('F d, Y', strtotime($reservation['date'])),
@@ -117,12 +117,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                 'purpose' => $reservation['purpose']
             ];
             
-            $mailer->sendReservationEmail(
-                $reservation['email'],
-                $reservation['name'],
-                $reservationDetails,
-                $status
-            );
+            // Send email notification
+            try {
+                $mailer->sendReservationEmail(
+                    $reservation['email'],
+                    $reservation['name'],
+                    $reservationDetails,
+                    $status
+                );
+            } catch (Exception $e) {
+                // Log error but don't stop the process
+                error_log("Email sending failed: " . $e->getMessage());
+            }
             
             // Create in-app notification
             $notifManager->notifyReservationStatus(
@@ -237,7 +243,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                 <i class="bi bi-list-task"></i> Reservation Records (<?= count($reservations); ?> Found)
             </div>
             
-            <!-- WRAPPER FOR SCROLLING -->
             <div class="table-scroll-wrapper">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped align-middle mb-0">
@@ -332,7 +337,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                     </table>
                 </div>
             </div>
-            <!-- WRAPPER FOR SCROLLING -->
         </div>
     </div>
 </div>
