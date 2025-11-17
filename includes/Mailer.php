@@ -1,5 +1,6 @@
 <?php
 require '../vendor/autoload.php';
+require_once 'config.php'; // ← ADD THIS LINE
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,17 +14,17 @@ class Mailer
         $this->mail = new PHPMailer(true);
         
         try {
-            // Server settings
+            // Server settings - Using Config class
             $this->mail->isSMTP();
-            $this->mail->Host       = 'smtp.gmail.com'; // Change to your SMTP host
+            $this->mail->Host       = Config::SMTP_HOST;
             $this->mail->SMTPAuth   = true;
-            $this->mail->Username   = 'alihassansali@gmail.com'; // Your email
-            $this->mail->Password   = 'jpjbfruifpqifjbc'; // Your app password
+            $this->mail->Username   = Config::SMTP_USERNAME;
+            $this->mail->Password   = Config::SMTP_PASSWORD;
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $this->mail->Port       = 587;
+            $this->mail->Port       = Config::SMTP_PORT;
             
-            // Sender info
-            $this->mail->setFrom('alihassansali@gmail.com', 'Gymnasium Reservation System');
+            // Sender info - Using Config class
+            $this->mail->setFrom(Config::SMTP_FROM_EMAIL, Config::SMTP_FROM_NAME);
             $this->mail->isHTML(true);
         } catch (Exception $e) {
             error_log("Mailer Error: {$this->mail->ErrorInfo}");

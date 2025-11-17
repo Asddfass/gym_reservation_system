@@ -122,41 +122,53 @@ if (isset($_POST['reserve']))
                 "i"
             );
             
-            // Notify all admins about new reservation
+            // ========================================
+            // UPDATED: Notification & Email Logic
+            // ========================================
+            
+            // 1. Send in-app notifications to ALL admins
             $admins = $func->fetchAll("SELECT user_id, email, name FROM user WHERE role = 'admin'");
             
             foreach ($admins as $admin) {
-                // Create in-app notification for admin
+                // Create in-app notification for each admin
                 $notifManager->createNotification(
                     $admin['user_id'],
                     '📋 New Reservation Request',
-                    "{$user['name']} has requested to reserve {$facility['name']} on " . date('M d, Y', strtotime($prev['date'])) . " from " . date('h:i A', strtotime($prev['start_time'])) . " to " . date('h:i A', strtotime($prev['end_time'])),
+                    "{$user['name']} has requested to reserve {$facility['name']} on " . 
+                    date('M d, Y', strtotime($prev['date'])) . " from " . 
+                    date('h:i A', strtotime($prev['start_time'])) . " to " . 
+                    date('h:i A', strtotime($prev['end_time'])),
                     'info',
                     'manage_reservations.php'
                 );
-                
-                // Send email to admin
-                try {
-                    $reservationDetails = [
-                        'facility' => $facility['name'],
-                        'date' => date('F d, Y', strtotime($prev['date'])),
-                        'start_time' => date('h:i A', strtotime($prev['start_time'])),
-                        'end_time' => date('h:i A', strtotime($prev['end_time'])),
-                        'purpose' => $prev['purpose'],
-                        'user_name' => $user['name']
-                    ];
-                    
-                    $mailer->sendAdminNotificationEmail(
-                        $admin['email'],
-                        $admin['name'],
-                        $reservationDetails
-                    );
-                } catch (Exception $e) {
-                    error_log("Failed to send admin notification email: " . $e->getMessage());
-                }
             }
             
-            $message = "Reservation submitted successfully for {$prev['duration']} day(s)! Admins have been notified.";
+            // 2. Send email to SINGLE configured admin email
+            try {
+                $reservationDetails = [
+                    'facility' => $facility['name'],
+                    'date' => date('F d, Y', strtotime($prev['date'])),
+                    'start_time' => date('h:i A', strtotime($prev['start_time'])),
+                    'end_time' => date('h:i A', strtotime($prev['end_time'])),
+                    'purpose' => $prev['purpose'],
+                    'user_name' => $user['name']
+                ];
+                
+                // Using Config class for admin email
+                $mailer->sendAdminNotificationEmail(
+                    Config::ADMIN_EMAIL,  // ← Single email from config
+                    Config::ADMIN_NAME,   // ← Admin name from config
+                    $reservationDetails
+                );
+                
+                $message = "✅ Reservation submitted successfully for {$prev['duration']} day(s)! Admin has been notified via email.";
+                
+            } catch (Exception $e) {
+                error_log("Failed to send admin notification email: " . $e->getMessage());
+                $message = "✅ Reservation submitted successfully for {$prev['duration']} day(s)! ⚠️ (Email notification failed - admin notified in-app)";
+            }
+            
+            // Reset form
             $prev = ['facility_id' => '', 'date' => '', 'start_time' => '', 'end_time' => '', 'purpose' => '', 'duration' => 1];
         }
     } 
@@ -195,7 +207,7 @@ if (isset($_POST['reserve']))
     </div>
 
     <?php if ($message): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+        <div class="alert alert-success"><?= $message ?></div>
     <?php elseif ($error): ?>
         <div class="alert alert-danger"><?= $error ?></div>
     <?php endif; ?>
