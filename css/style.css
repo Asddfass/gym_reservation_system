@@ -184,34 +184,42 @@ body::before {
   margin-bottom: 2rem;
 }
 
+/* Form Styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
 .form-label {
   font-weight: 600;
   color: #2d3748;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
+  display: block;
 }
 
-.input-group {
-  margin-bottom: 1.5rem;
+.input-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .input-icon {
   position: absolute;
   left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #a0aec0;
   z-index: 5;
   font-size: 1.1rem;
+  pointer-events: none;
 }
 
 .form-control {
+  width: 100%;
   padding: 1rem 1rem 1rem 3rem;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
+  background: white;
 }
 
 .form-control:focus {
@@ -253,6 +261,9 @@ body::before {
   margin-bottom: 1.5rem;
   border: none;
   animation: shake 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 @keyframes shake {

@@ -2,6 +2,7 @@
 session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
+include '../includes/Mailer.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') 
 {
@@ -10,8 +11,9 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin')
 }
 
 $fn = new Functions();
+$mailer = new Mailer();
 $message = $error = "";
-$current_user_id = $_SESSION['user']['user_id']; // Get the ID of the currently logged-in admin
+$current_user_id = $_SESSION['user']['user_id'];
 
 // Handle Add Account
 if (isset($_POST['add_account'])) 
@@ -23,8 +25,7 @@ if (isset($_POST['add_account']))
 
     if ($name && $email && $password) 
     {
-        
-        // --- NEW: Check if email already exists ---
+        // Check if email already exists
         $existing_user = $fn->fetchOne("SELECT user_id FROM user WHERE email = ?", [$email], "s");
         
         if ($existing_user) 
@@ -33,14 +34,22 @@ if (isset($_POST['add_account']))
         } 
         else 
         {
-            // --- END NEW CHECK ---
+            // Hash password and insert user
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $fn->execute(
                 "INSERT INTO user (name, email, password, role) VALUES (?, ?, ?, ?)",
                 [$name, $email, $hashed, $role],
                 "ssss"
             );
-            $message = "Account added successfully.";
+            
+            // Send welcome email
+            try {
+                $mailer->sendWelcomeEmail($email, $name, $role);
+                $message = "Account added successfully! Welcome email sent to " . htmlspecialchars($email);
+            } catch (Exception $e) {
+                error_log("Failed to send welcome email: " . $e->getMessage());
+                $message = "Account added successfully! (Note: Welcome email could not be sent)";
+            }
         }
     } 
     else 
@@ -75,7 +84,7 @@ if (isset($_POST['change_password']))
     else 
     {
         $error = "Password field cannot be empty.";
-        $_POST['edit_mode'] = $id; // stay in edit mode
+        $_POST['edit_mode'] = $id;
     }
 }
 
@@ -84,7 +93,6 @@ if (isset($_GET['delete']))
 {
     $id = intval($_GET['delete']);
     
-    // --- SECURITY CHECK: Prevent deletion of the current user ---
     if ($id === $current_user_id) {
         $error = "You cannot delete the account you are currently logged in as.";
     } else {
@@ -167,7 +175,7 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
                         <tbody>
                             <?php foreach ($accounts as $acc): 
                                 $isEditing = (isset($_POST['edit_mode']) && $_POST['edit_mode'] == $acc['user_id']);
-                                $is_self = $acc['user_id'] == $current_user_id; // Check if this is the current user
+                                $is_self = $acc['user_id'] == $current_user_id;
                             ?>
                             <tr>
                                 <form method="POST">

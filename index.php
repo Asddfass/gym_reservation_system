@@ -66,30 +66,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       <?php endif; ?>
 
       <form method="POST" id="loginForm">
-        <div class="input-group">
-          <label class="form-label">Email Address</label>
-          <i class="bi bi-envelope input-icon"></i>
-          <input 
-            type="email" 
-            name="email" 
-            class="form-control" 
-            placeholder="Enter your email"
-            required
-            autocomplete="email"
-          >
+        <div class="form-group mb-3">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope input-icon"></i>
+            <input 
+              type="email" 
+              name="email" 
+              id="email"
+              class="form-control" 
+              placeholder="Enter your email"
+              required
+              autocomplete="email"
+            >
+          </div>
         </div>
 
-        <div class="input-group">
-          <label class="form-label">Password</label>
-          <i class="bi bi-lock input-icon"></i>
-          <input 
-            type="password" 
-            name="password" 
-            class="form-control" 
-            placeholder="Enter your password"
-            required
-            autocomplete="current-password"
-          >
+        <div class="form-group mb-4">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock input-icon"></i>
+            <input 
+              type="password" 
+              name="password" 
+              id="password"
+              class="form-control" 
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            >
+          </div>
         </div>
 
         <button type="submit" class="btn-login" id="loginBtn">
