@@ -179,31 +179,31 @@ foreach ($reservations as $res) {
             </div>
         </div>
 
-        <!-- Statistics Cards -->
+        <!-- Statistics Cards - FIXED: Changed from stats-card to card-stats -->
         <div class="row g-3 mb-4 no-print">
             <div class="col-lg-3 col-md-6">
-                <div class="stats-card bg-crimson">
+                <div class="card-stats bg-crimson text-white">
                     <i class="bi bi-list-task fs-3 mb-2"></i>
                     <h4><?= $total_reservations ?></h4>
                     <p class="mb-0">Total Results</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stats-card bg-gold text-dark">
+                <div class="card-stats bg-gold text-dark">
                     <i class="bi bi-hourglass-split fs-3 mb-2"></i>
                     <h4><?= $status_counts['pending'] ?></h4>
                     <p class="mb-0">Pending</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stats-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                <div class="card-stats" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
                     <i class="bi bi-check-circle fs-3 mb-2"></i>
                     <h4><?= $status_counts['approved'] ?></h4>
                     <p class="mb-0">Approved</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stats-card bg-darkred">
+                <div class="card-stats bg-darkred text-white">
                     <i class="bi bi-x-circle fs-3 mb-2"></i>
                     <h4><?= $status_counts['denied'] + $status_counts['cancelled'] ?></h4>
                     <p class="mb-0">Denied/Cancelled</p>
