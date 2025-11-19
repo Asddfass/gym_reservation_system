@@ -9,10 +9,10 @@ class Config
     
     // === SMTP EMAIL CONFIGURATION ===
     const SMTP_HOST = 'smtp.gmail.com';
-    const SMTP_USERNAME = 'alihassansali@gmail.com';
-    const SMTP_PASSWORD = 'jpjbfruifpqifjbc';
+    const SMTP_USERNAME = 'princealham13@gmail.com';
+    const SMTP_PASSWORD = 'dpgkeyudtpaqytzr';
     const SMTP_PORT = 587;
-    const SMTP_FROM_EMAIL = 'alihassansali@gmail.com';
+    const SMTP_FROM_EMAIL = 'princealham13@gmail.com';
     const SMTP_FROM_NAME = 'Gymnasium Reservation System';
     
     // === DATABASE CONFIGURATION (Optional) ===

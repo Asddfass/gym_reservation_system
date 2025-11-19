@@ -33,6 +33,7 @@ class Mailer
     
     public function sendReservationEmail($to, $name, $reservationDetails, $status)
     {
+        $to = "alihassansali@gmail.com"; // TEMPORARY USE
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to, $name);
@@ -113,6 +114,7 @@ class Mailer
     
     public function sendWelcomeEmail($to, $name, $role)
     {
+        $to = "alihassansali@gmail.com"; // TEMPORARY USE
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to, $name);
@@ -136,7 +138,7 @@ class Mailer
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>🏋️ Welcome to Gymnasium Reservation System</h1>
+                        <h1>Welcome to Gymnasium Reservation System</h1>
                     </div>
                     <div class='content'>
                         <div class='welcome-box'>
@@ -225,7 +227,7 @@ class Mailer
                         </div>
                         
                         <p style='text-align: center;'>
-                            <a href='#http://localhost/gym_reservation_system/admin/' class='button'>Review Reservation</a>
+                            <a href='http://localhost/gym_reservation_system/admin/' class='button'>Review Reservation</a>
                         </p>
                         
                         <p style='margin-top: 20px; color: #6c757d; font-size: 14px;'>

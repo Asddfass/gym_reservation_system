@@ -41,9 +41,6 @@ $user = $_SESSION['user'];
             <a href="#" class="nav-link" data-page="my_reservations.php">
                 <i class="bi bi-calendar-check"></i> My Reservations
             </a>
-            <a href="#" class="nav-link" data-page="notifications.php">
-                <i class="bi bi-bell"></i> Notifications
-            </a>
             <a href="#" class="nav-link" data-page="user_profile.php">
                 <i class="bi bi-person-circle"></i> Profile
             </a>
