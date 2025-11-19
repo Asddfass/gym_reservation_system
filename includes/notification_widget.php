@@ -100,6 +100,15 @@ notificationBell.addEventListener('click', function(e) {
         
         // Load notifications page in iframe
         iframe.src = page;
+        
+        // Manually trigger active state update after a brief delay
+        setTimeout(() => {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.dataset.page === page) {
+                    link.classList.add('active');
+                }
+            });
+        }, 100);
     } else {
         // If no iframe, navigate directly
         window.location.href = page;

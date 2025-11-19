@@ -3,8 +3,7 @@ session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') 
-{
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../");
     exit();
 }
@@ -32,39 +31,34 @@ $params = [];
 $types = "";
 
 // Add User filter
-if ($filter_user) 
-{
+if ($filter_user) {
     $sql .= " AND r.user_id = ?";
     $params[] = intval($filter_user);
     $types .= "i";
 }
 
 // Add Facility filter
-if ($filter_facility) 
-{
+if ($filter_facility) {
     $sql .= " AND r.facility_id = ?";
     $params[] = intval($filter_facility);
     $types .= "i";
 }
 
 // Add Date Range filter
-if ($filter_date_from) 
-{
+if ($filter_date_from) {
     $sql .= " AND r.date >= ?";
     $params[] = $filter_date_from;
     $types .= "s";
 }
 
-if ($filter_date_to) 
-{
+if ($filter_date_to) {
     $sql .= " AND r.date <= ?";
     $params[] = $filter_date_to;
     $types .= "s";
 }
 
 // Add Status filter
-if ($filter_status && $filter_status !== 'all') 
-{
+if ($filter_status && $filter_status !== 'all') {
     $sql .= " AND r.status = ?";
     $params[] = $filter_status;
     $types .= "s";
@@ -82,18 +76,16 @@ $facilities = $fn->getFacilities();
 
 // Calculate statistics
 $total_reservations = count($reservations);
-$status_counts = 
-[
-    'pending' => 0,
-    'approved' => 0,
-    'denied' => 0,
-    'cancelled' => 0
-];
+$status_counts =
+    [
+        'pending' => 0,
+        'approved' => 0,
+        'denied' => 0,
+        'cancelled' => 0
+    ];
 
-foreach ($reservations as $res) 
-{
-    if (isset($status_counts[$res['status']])) 
-    {
+foreach ($reservations as $res) {
+    if (isset($status_counts[$res['status']])) {
         $status_counts[$res['status']]++;
     }
 }
@@ -101,6 +93,7 @@ foreach ($reservations as $res)
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,199 +104,247 @@ foreach ($reservations as $res)
     <link href="../css/reports.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
+
 <body>
 
-<div class="admin-content px-4 py-4">
-    <div class="content-header d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-semibold text-dark mb-0">Reports & Analytics</h2>
-        <button onclick="window.print()" class="btn btn-darkred no-print">
-            <i class="bi bi-printer"></i> Print Report
-        </button>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="card shadow-sm mb-4 no-print">
-        <div class="card-header bg-darkred text-white fw-semibold">
-            <i class="bi bi-funnel"></i> Filter Reservations
-        </div>
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <label for="user_id" class="form-label">User</label>
-                    <select name="user_id" id="user_id" class="form-select">
-                        <option value="">-- All Users --</option>
-                        <?php foreach ($users as $user): ?>
-                            <option value="<?= $user['user_id'] ?>" <?= $filter_user == $user['user_id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label for="facility_id" class="form-label">Facility</label>
-                    <select name="facility_id" id="facility_id" class="form-select">
-                        <option value="">-- All Facilities --</option>
-                        <?php foreach ($facilities as $facility): ?>
-                            <option value="<?= $facility['facility_id'] ?>" <?= $filter_facility == $facility['facility_id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($facility['name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label for="date_from" class="form-label">Date From</label>
-                    <input type="date" name="date_from" id="date_from" class="form-control" value="<?= htmlspecialchars($filter_date_from) ?>">
-                </div>
-
-                <div class="col-md-2">
-                    <label for="date_to" class="form-label">Date To</label>
-                    <input type="date" name="date_to" id="date_to" class="form-control" value="<?= htmlspecialchars($filter_date_to) ?>">
-                </div>
-
-                <div class="col-md-2">
-                    <label for="status" class="form-label">Status</label>
-                    <select name="status" id="status" class="form-select">
-                        <option value="all" <?= $filter_status === 'all' || $filter_status === '' ? 'selected' : '' ?>>-- All Statuses --</option>
-                        <option value="pending" <?= $filter_status === 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="approved" <?= $filter_status === 'approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="denied" <?= $filter_status === 'denied' ? 'selected' : '' ?>>Denied</option>
-                        <option value="cancelled" <?= $filter_status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                    </select>
-                </div>
-
-                <div class="col-12 text-end">
-                    <button type="submit" class="btn btn-submit">
-                        <i class="bi bi-search"></i> Filter Report
-                    </button>
-                    <a href="admin_reports.php" class="btn btn-secondary">
-                        <i class="bi bi-arrow-clockwise"></i> Clear Filters
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-3 mb-4 no-print">
-        <div class="col-lg-3 col-md-6">
-            <div class="stats-card bg-crimson">
-                <i class="bi bi-list-task fs-3 mb-2"></i>
-                <h4><?= $total_reservations ?></h4>
-                <p class="mb-0">Total Results</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="stats-card bg-gold text-dark">
-                <i class="bi bi-hourglass-split fs-3 mb-2"></i>
-                <h4><?= $status_counts['pending'] ?></h4>
-                <p class="mb-0">Pending</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="stats-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
-                <i class="bi bi-check-circle fs-3 mb-2"></i>
-                <h4><?= $status_counts['approved'] ?></h4>
-                <p class="mb-0">Approved</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="stats-card bg-darkred">
-                <i class="bi bi-x-circle fs-3 mb-2"></i>
-                <h4><?= $status_counts['denied'] + $status_counts['cancelled'] ?></h4>
-                <p class="mb-0">Denied/Cancelled</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Printable Report Area -->
-    <div id="printable-area">
-        <!-- Print Header (only visible when printing) -->
-        <div class="print-header">
-            <h2>Gymnasium Reservation System</h2>
-            <h3>Reservation Report</h3>
-            <div class="print-info">
-                <p><strong>Generated:</strong> <?= date('F d, Y h:i A') ?></p>
-                <?php if ($filter_date_from || $filter_date_to): ?>
-                    <p><strong>Date Range:</strong> 
-                        <?= $filter_date_from ? date('M d, Y', strtotime($filter_date_from)) : 'Start' ?> 
-                        to 
-                        <?= $filter_date_to ? date('M d, Y', strtotime($filter_date_to)) : 'End' ?>
-                    </p>
-                <?php endif; ?>
-                <?php if ($filter_user): ?>
-                    <p><strong>User:</strong> <?= htmlspecialchars($users[array_search($filter_user, array_column($users, 'user_id'))]['name'] ?? 'N/A') ?></p>
-                <?php endif; ?>
-                <?php if ($filter_facility): ?>
-                    <p><strong>Facility:</strong> <?= htmlspecialchars($facilities[array_search($filter_facility, array_column($facilities, 'facility_id'))]['name'] ?? 'N/A') ?></p>
-                <?php endif; ?>
-                <p><strong>Total Records:</strong> <?= $total_reservations ?></p>
-            </div>
+    <div class="admin-content px-4 py-4">
+        <div class="content-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-semibold text-dark mb-0">Reports & Analytics</h2>
+            <button onclick="window.print()" class="btn btn-darkred no-print">
+                <i class="bi bi-printer"></i> Print Report
+            </button>
         </div>
 
-        <!-- Report Table -->
-        <div class="card shadow-sm">
+        <!-- Filters Section -->
+        <div class="card shadow-sm mb-4 no-print">
             <div class="card-header bg-darkred text-white fw-semibold">
-                Reservation Records (<?= $total_reservations ?> Found)
+                <i class="bi bi-funnel"></i> Filter Reservations
             </div>
-            
-            <div class="table-scroll-wrapper">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>No.</th>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Facility</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Purpose</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($reservations)): ?>
-                                <?php $no = 1; ?>
-                                <?php foreach ($reservations as $row): ?>
-                                    <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= htmlspecialchars($row['user_name']) ?></td>
-                                        <td><span class="badge bg-secondary"><?= ucfirst($row['user_role']) ?></span></td>
-                                        <td><?= htmlspecialchars($row['facility_name']) ?></td>
-                                        <td><?= date('M d, Y', strtotime($row['date'])) ?></td>
-                                        <td><?= date('h:i A', strtotime($row['start_time'])) ?> - <?= date('h:i A', strtotime($row['end_time'])) ?></td>
-                                        <td><?= htmlspecialchars($row['purpose']) ?></td>
-                                        <td>
-                                            <span class="badge bg-<?=
-                                                match ($row['status']) 
-                                                {
-                                                    'approved' => 'success',
-                                                    'denied' => 'danger',
-                                                    'cancelled' => 'secondary',
-                                                    default => 'warning'
-                                                };
-                                            ?>">
-                                                <?= ucfirst($row['status']) ?>
-                                            </span>
-                                        </td>
-                                        <td><?= date('M d, Y', strtotime($row['created_at'])) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="user_id" class="form-label">User</label>
+                        <select name="user_id" id="user_id" class="form-select">
+                            <option value="">-- All Users --</option>
+                            <?php foreach ($users as $user): ?>
+                                <option value="<?= $user['user_id'] ?>" <?= $filter_user == $user['user_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="facility_id" class="form-label">Facility</label>
+                        <select name="facility_id" id="facility_id" class="form-select">
+                            <option value="">-- All Facilities --</option>
+                            <?php foreach ($facilities as $facility): ?>
+                                <option value="<?= $facility['facility_id'] ?>" <?= $filter_facility == $facility['facility_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($facility['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="date_from" class="form-label">Date From</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control" value="<?= htmlspecialchars($filter_date_from) ?>">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="date_to" class="form-label">Date To</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control" value="<?= htmlspecialchars($filter_date_to) ?>">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="all" <?= $filter_status === 'all' || $filter_status === '' ? 'selected' : '' ?>>-- All Statuses --</option>
+                            <option value="pending" <?= $filter_status === 'pending' ? 'selected' : '' ?>>Pending</option>
+                            <option value="approved" <?= $filter_status === 'approved' ? 'selected' : '' ?>>Approved</option>
+                            <option value="denied" <?= $filter_status === 'denied' ? 'selected' : '' ?>>Denied</option>
+                            <option value="cancelled" <?= $filter_status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-submit">
+                            <i class="bi bi-search"></i> Filter Report
+                        </button>
+                        <a href="admin_reports.php" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Clear Filters
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4 no-print">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card bg-crimson">
+                    <i class="bi bi-list-task fs-3 mb-2"></i>
+                    <h4><?= $total_reservations ?></h4>
+                    <p class="mb-0">Total Results</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card bg-gold text-dark">
+                    <i class="bi bi-hourglass-split fs-3 mb-2"></i>
+                    <h4><?= $status_counts['pending'] ?></h4>
+                    <p class="mb-0">Pending</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <i class="bi bi-check-circle fs-3 mb-2"></i>
+                    <h4><?= $status_counts['approved'] ?></h4>
+                    <p class="mb-0">Approved</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card bg-darkred">
+                    <i class="bi bi-x-circle fs-3 mb-2"></i>
+                    <h4><?= $status_counts['denied'] + $status_counts['cancelled'] ?></h4>
+                    <p class="mb-0">Denied/Cancelled</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Printable Report Area -->
+        <div id="printable-area">
+            <!-- Print Header (only visible when printing) -->
+            <div class="print-header">
+                <h2>Gymnasium Reservation System</h2>
+                <h3>Reservation Report</h3>
+                <div class="print-info">
+                    <p><strong>Generated:</strong> <?= date('F d, Y h:i A') ?></p>
+                    <?php if ($filter_date_from || $filter_date_to): ?>
+                        <p><strong>Date Range:</strong>
+                            <?= $filter_date_from ? date('M d, Y', strtotime($filter_date_from)) : 'Start' ?>
+                            to
+                            <?= $filter_date_to ? date('M d, Y', strtotime($filter_date_to)) : 'End' ?>
+                        </p>
+                    <?php endif; ?>
+                    <?php if ($filter_user): ?>
+                        <p><strong>User:</strong> <?= htmlspecialchars($users[array_search($filter_user, array_column($users, 'user_id'))]['name'] ?? 'N/A') ?></p>
+                    <?php endif; ?>
+                    <?php if ($filter_facility): ?>
+                        <p><strong>Facility:</strong> <?= htmlspecialchars($facilities[array_search($filter_facility, array_column($facilities, 'facility_id'))]['name'] ?? 'N/A') ?></p>
+                    <?php endif; ?>
+                    <p><strong>Total Records:</strong> <?= $total_reservations ?></p>
+                </div>
+            </div>
+
+            <!-- Report Table -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-darkred text-white fw-semibold">
+                    Reservation Records (<?= $total_reservations ?> Found)
+                </div>
+
+                <div class="table-scroll-wrapper">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted py-3">No reservations found matching the selected filters.</td>
+                                    <th>No.</th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Facility</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
                                 </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($reservations)): ?>
+                                    <?php $no = 1; ?>
+                                    <?php foreach ($reservations as $row): ?>
+                                        <tr>
+                                            <td><?= $no++ ?></td>
+                                            <td><?= htmlspecialchars($row['user_name']) ?></td>
+                                            <td><span class="badge bg-secondary"><?= ucfirst($row['user_role']) ?></span></td>
+                                            <td><?= htmlspecialchars($row['facility_name']) ?></td>
+                                            <td><?= date('M d, Y', strtotime($row['date'])) ?></td>
+                                            <td><?= date('h:i A', strtotime($row['start_time'])) ?> - <?= date('h:i A', strtotime($row['end_time'])) ?></td>
+                                            <td><?= htmlspecialchars($row['purpose']) ?></td>
+                                            <td>
+                                                <span class="badge bg-<?=
+                                                                        match ($row['status']) {
+                                                                            'approved' => 'success',
+                                                                            'denied' => 'danger',
+                                                                            'cancelled' => 'secondary',
+                                                                            default => 'warning'
+                                                                        };
+                                                                        ?>">
+                                                    <?= ucfirst($row['status']) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= date('M d, Y', strtotime($row['created_at'])) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted py-3">No reservations found matching the selected filters.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <script>
+        // Notify parent frame about current page
+        (function() {
+            const currentPage = window.location.pathname.split('/').pop();
 
+            // Announce page on load
+            function announcePage() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'pageChanged',
+                        page: currentPage
+                    }, '*');
+                }
+            }
+
+            // Announce immediately
+            announcePage();
+
+            // Listen for parent's request
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'requestPageInfo') {
+                    announcePage();
+                }
+            });
+
+            // Intercept navigation links (for "View details" etc.)
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+
+                // Check if it's an internal page navigation
+                if (href && !href.startsWith('http') && !href.startsWith('#') &&
+                    !href.includes('?action=') && href.endsWith('.php')) {
+
+                    // Announce the target page
+                    const targetPage = href.split('/').pop();
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'pageChanged',
+                            page: targetPage
+                        }, '*');
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
+
 </html>

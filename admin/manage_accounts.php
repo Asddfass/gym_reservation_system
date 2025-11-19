@@ -4,8 +4,7 @@ include '../includes/Database.php';
 include '../includes/functions.php';
 include '../includes/Mailer.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') 
-{
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../");
     exit();
 }
@@ -16,24 +15,19 @@ $message = $error = "";
 $current_user_id = $_SESSION['user']['user_id'];
 
 // Handle Add Account
-if (isset($_POST['add_account'])) 
-{
+if (isset($_POST['add_account'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
     $role = $_POST['role'];
 
-    if ($name && $email && $password) 
-    {
+    if ($name && $email && $password) {
         // Check if email already exists
         $existing_user = $fn->fetchOne("SELECT user_id FROM user WHERE email = ?", [$email], "s");
-        
-        if ($existing_user) 
-        {
+
+        if ($existing_user) {
             $error = "An account with the email " . htmlspecialchars($email) . " already exists.";
-        } 
-        else 
-        {
+        } else {
             // Hash password and insert user
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $fn->execute(
@@ -41,7 +35,7 @@ if (isset($_POST['add_account']))
                 [$name, $email, $hashed, $role],
                 "ssss"
             );
-            
+
             // Send welcome email
             try {
                 $mailer->sendWelcomeEmail($email, $name, $role);
@@ -51,16 +45,13 @@ if (isset($_POST['add_account']))
                 $message = "Account added successfully! (Note: Welcome email could not be sent)";
             }
         }
-    } 
-    else 
-    {
+    } else {
         $error = "Please fill in all fields.";
     }
 }
 
 // Handle Edit
-if (isset($_POST['save_edit'])) 
-{
+if (isset($_POST['save_edit'])) {
     $id = intval($_POST['user_id']);
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
@@ -70,29 +61,24 @@ if (isset($_POST['save_edit']))
 }
 
 // Handle Change Password
-if (isset($_POST['change_password'])) 
-{
+if (isset($_POST['change_password'])) {
     $id = intval($_POST['user_id']);
     $new_pass = trim($_POST['new_password']);
 
-    if (!empty($new_pass)) 
-    {
+    if (!empty($new_pass)) {
         $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
         $fn->execute("UPDATE user SET password=? WHERE user_id=?", [$hashed, $id], "si");
         $message = "Password changed successfully.";
-    } 
-    else 
-    {
+    } else {
         $error = "Password field cannot be empty.";
         $_POST['edit_mode'] = $id;
     }
 }
 
 // Handle Delete
-if (isset($_GET['delete'])) 
-{
+if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
-    
+
     if ($id === $current_user_id) {
         $error = "You cannot delete the account you are currently logged in as.";
     } else {
@@ -107,6 +93,7 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,9 +105,9 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
 
 <body>
     <div class="admin-content px-4 py-4">
-    <div class="content-header d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
-    </div>
+        <div class="content-header d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
+        </div>
 
         <?php if ($message): ?>
             <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
@@ -173,49 +160,49 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($accounts as $acc): 
+                            <?php foreach ($accounts as $acc):
                                 $isEditing = (isset($_POST['edit_mode']) && $_POST['edit_mode'] == $acc['user_id']);
                                 $is_self = $acc['user_id'] == $current_user_id;
                             ?>
-                            <tr>
-                                <form method="POST">
-                                    <input type="hidden" name="user_id" value="<?= $acc['user_id'] ?>">
-                                    <td><?= $acc['user_id'] ?></td>
-                                    <td><input type="text" name="name" value="<?= htmlspecialchars($acc['name']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
-                                    <td><input type="email" name="email" value="<?= htmlspecialchars($acc['email']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
-                                    <td>
-                                        <select name="role" class="form-select form-select-sm" <?= $isEditing ? '' : 'disabled' ?>>
-                                            <?php foreach (['student', 'faculty', 'guest', 'admin'] as $r): ?>
-                                                <option value="<?= $r ?>" <?= $acc['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if ($isEditing): ?>
-                                            <div class="d-flex flex-column gap-2">
+                                <tr>
+                                    <form method="POST">
+                                        <input type="hidden" name="user_id" value="<?= $acc['user_id'] ?>">
+                                        <td><?= $acc['user_id'] ?></td>
+                                        <td><input type="text" name="name" value="<?= htmlspecialchars($acc['name']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
+                                        <td><input type="email" name="email" value="<?= htmlspecialchars($acc['email']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
+                                        <td>
+                                            <select name="role" class="form-select form-select-sm" <?= $isEditing ? '' : 'disabled' ?>>
+                                                <?php foreach (['student', 'faculty', 'guest', 'admin'] as $r): ?>
+                                                    <option value="<?= $r ?>" <?= $acc['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php if ($isEditing): ?>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <button type="submit" name="save_edit" class="btn btn-sm btn-approve">Save</button>
+                                                        <button type="submit" name="cancel" class="btn btn-sm btn-cancel">Cancel</button>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <input type="password" name="new_password" class="form-control form-control-sm mb-2" placeholder="New Password">
+                                                        <button type="submit" name="change_password" class="btn btn-sm btn-deny w-100">Change Password</button>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <button type="submit" name="save_edit" class="btn btn-sm btn-approve">Save</button>
-                                                    <button type="submit" name="cancel" class="btn btn-sm btn-cancel">Cancel</button>
+                                                    <button type="submit" name="edit_mode" value="<?= $acc['user_id'] ?>" class="btn btn-sm btn-manage">Edit</button>
+
+                                                    <?php if ($is_self): ?>
+                                                        <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot delete your own account">Delete</button>
+                                                    <?php else: ?>
+                                                        <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this account?')">Delete</a>
+                                                    <?php endif; ?>
                                                 </div>
-                                                <div class="mt-2">
-                                                    <input type="password" name="new_password" class="form-control form-control-sm mb-2" placeholder="New Password">
-                                                    <button type="submit" name="change_password" class="btn btn-sm btn-deny w-100">Change Password</button>
-                                                </div>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button type="submit" name="edit_mode" value="<?= $acc['user_id'] ?>" class="btn btn-sm btn-manage">Edit</button>
-                                                
-                                                <?php if ($is_self): ?>
-                                                    <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot delete your own account">Delete</button>
-                                                <?php else: ?>
-                                                    <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this account?')">Delete</a>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-                                </form>
-                            </tr>
+                                            <?php endif; ?>
+                                        </td>
+                                    </form>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -223,5 +210,54 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
             </div>
         </div>
     </div>
+    <script>
+        // Notify parent frame about current page
+        (function() {
+            const currentPage = window.location.pathname.split('/').pop();
+
+            // Announce page on load
+            function announcePage() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'pageChanged',
+                        page: currentPage
+                    }, '*');
+                }
+            }
+
+            // Announce immediately
+            announcePage();
+
+            // Listen for parent's request
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'requestPageInfo') {
+                    announcePage();
+                }
+            });
+
+            // Intercept navigation links (for "View details" etc.)
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+
+                // Check if it's an internal page navigation
+                if (href && !href.startsWith('http') && !href.startsWith('#') &&
+                    !href.includes('?action=') && href.endsWith('.php')) {
+
+                    // Announce the target page
+                    const targetPage = href.split('/').pop();
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'pageChanged',
+                            page: targetPage
+                        }, '*');
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
+
 </html>

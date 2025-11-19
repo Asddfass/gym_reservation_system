@@ -3,8 +3,7 @@ session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin') 
-{
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin') {
     header("Location: ../");
     exit();
 }
@@ -37,6 +36,7 @@ $available_facilities = $func->fetchAll("
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +45,7 @@ $available_facilities = $func->fetchAll("
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/user.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
@@ -113,9 +114,7 @@ $available_facilities = $func->fetchAll("
                                             <td><?= htmlspecialchars($row['end_time']); ?></td>
                                             <td>
                                                 <span class="badge 
-                                                    <?= $row['status'] === 'approved' ? 'bg-success' : 
-                                                    ($row['status'] === 'pending' ? 'bg-warning text-dark' : 
-                                                    ($row['status'] === 'cancelled' ? 'bg-secondary' : 'bg-danger')); ?>">
+                                                    <?= $row['status'] === 'approved' ? 'bg-success' : ($row['status'] === 'pending' ? 'bg-warning text-dark' : ($row['status'] === 'cancelled' ? 'bg-secondary' : 'bg-danger')); ?>">
                                                     <?= ucfirst($row['status']); ?>
                                                 </span>
                                             </td>
@@ -168,5 +167,54 @@ $available_facilities = $func->fetchAll("
 
     <!-- Bootstrap icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script>
+        // Notify parent frame about current page
+        (function() {
+            const currentPage = window.location.pathname.split('/').pop();
+
+            // Announce page on load
+            function announcePage() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'pageChanged',
+                        page: currentPage
+                    }, '*');
+                }
+            }
+
+            // Announce immediately
+            announcePage();
+
+            // Listen for parent's request
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'requestPageInfo') {
+                    announcePage();
+                }
+            });
+
+            // Intercept navigation links (for "View details" etc.)
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+
+                // Check if it's an internal page navigation
+                if (href && !href.startsWith('http') && !href.startsWith('#') &&
+                    !href.includes('?action=') && href.endsWith('.php')) {
+
+                    // Announce the target page
+                    const targetPage = href.split('/').pop();
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'pageChanged',
+                            page: targetPage
+                        }, '*');
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
+
 </html>

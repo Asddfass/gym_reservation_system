@@ -3,8 +3,7 @@ session_start();
 include '../includes/Database.php';
 include '../includes/functions.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin') 
-{
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin') {
     header("Location: ../");
     exit();
 }
@@ -13,6 +12,7 @@ $user = $_SESSION['user'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +30,7 @@ $user = $_SESSION['user'];
             <img src="../assets/logo.png" alt="Logo" class="sidebar-logo">
             <h4>User Panel</h4>
         </div>
-        
+
         <div class="sidebar-nav">
             <a href="#" class="nav-link active" data-page="user_overview.php">
                 <i class="bi bi-speedometer2"></i> Overview
@@ -66,10 +66,30 @@ $user = $_SESSION['user'];
     </div>
 
     <script>
-        // Sidebar Navigation
+        // Sidebar navigation logic
         const links = document.querySelectorAll('.nav-link');
         const iframe = document.getElementById('content-frame');
 
+        // Page to nav-link mapping
+        const pageMapping = {
+            'user_overview.php': 'user_overview.php',
+            'reserve_facility.php': 'reserve_facility.php',
+            'my_reservations.php': 'my_reservations.php',
+            'user_profile.php': 'user_profile.php',
+            'notifications.php': 'notifications.php'
+        };
+
+        // Function to update active nav link
+        function updateActiveNavLink(pageName) {
+            links.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.page === pageName) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Handle nav link clicks
         links.forEach(link => {
             link.addEventListener('click', e => {
                 e.preventDefault();
@@ -78,6 +98,28 @@ $user = $_SESSION['user'];
                 iframe.src = link.dataset.page;
             });
         });
+
+        // Listen for page change messages from iframe
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'pageChanged') {
+                const pageName = event.data.page;
+                if (pageName && pageMapping[pageName]) {
+                    updateActiveNavLink(pageName);
+                }
+            }
+        });
+
+        // Monitor iframe load events
+        iframe.addEventListener('load', function() {
+            try {
+                iframe.contentWindow.postMessage({
+                    type: 'requestPageInfo'
+                }, '*');
+            } catch (e) {
+                console.log('Could not communicate with iframe:', e);
+            }
+        });
     </script>
 </body>
+
 </html>
