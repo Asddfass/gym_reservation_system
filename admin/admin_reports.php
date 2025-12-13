@@ -30,21 +30,18 @@ $sql = "
 $params = [];
 $types = "";
 
-// Add User filter
 if ($filter_user) {
     $sql .= " AND r.user_id = ?";
     $params[] = intval($filter_user);
     $types .= "i";
 }
 
-// Add Facility filter
 if ($filter_facility) {
     $sql .= " AND r.facility_id = ?";
     $params[] = intval($filter_facility);
     $types .= "i";
 }
 
-// Add Date Range filter
 if ($filter_date_from) {
     $sql .= " AND r.date >= ?";
     $params[] = $filter_date_from;
@@ -57,32 +54,25 @@ if ($filter_date_to) {
     $types .= "s";
 }
 
-// Add Status filter
 if ($filter_status && $filter_status !== 'all') {
     $sql .= " AND r.status = ?";
     $params[] = $filter_status;
     $types .= "s";
 }
 
-// Order by date and time
 $sql .= " ORDER BY r.date DESC, r.start_time DESC";
 
-// Execute query
 $reservations = $fn->fetchAll($sql, $params, $types);
-
-// Fetch all users and facilities for dropdowns
 $users = $fn->fetchAll("SELECT user_id, name, email FROM user ORDER BY name");
 $facilities = $fn->getFacilities();
 
-// Calculate statistics
 $total_reservations = count($reservations);
-$status_counts =
-    [
-        'pending' => 0,
-        'approved' => 0,
-        'denied' => 0,
-        'cancelled' => 0
-    ];
+$status_counts = [
+    'pending' => 0,
+    'approved' => 0,
+    'denied' => 0,
+    'cancelled' => 0
+];
 
 foreach ($reservations as $res) {
     if (isset($status_counts[$res['status']])) {
@@ -93,7 +83,6 @@ foreach ($reservations as $res) {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,12 +90,258 @@ foreach ($reservations as $res) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
-    <link href="../css/reports.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        /* Enhanced Print Styles */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1.5cm 1cm;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            #printable-area,
+            #printable-area * {
+                visibility: visible;
+            }
+
+            #printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-header {
+                display: block;
+                text-align: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 3px solid #a4161a;
+            }
+
+            .print-header h2 {
+                margin: 0;
+                font-size: 28px;
+                color: #a4161a;
+                font-weight: 700;
+            }
+
+            .print-header h3 {
+                margin: 8px 0 0 0;
+                font-size: 20px;
+                color: #660708;
+                font-weight: 600;
+            }
+
+            .print-info {
+                margin-top: 15px;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-info p {
+                margin: 0;
+                font-size: 11px;
+                color: #333;
+            }
+
+            .print-info strong {
+                color: #a4161a;
+            }
+
+            .print-summary {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .print-stat-box {
+                border: 2px solid #dee2e6;
+                border-radius: 6px;
+                padding: 10px;
+                text-align: center;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-stat-box h4 {
+                font-size: 24px;
+                margin: 5px 0;
+                font-weight: 700;
+            }
+
+            .print-stat-box p {
+                font-size: 10px;
+                margin: 0;
+                color: #666;
+            }
+
+            .stat-total { border-color: #dc2f02; }
+            .stat-pending { border-color: #ffc107; }
+            .stat-approved { border-color: #28a745; }
+            .stat-denied { border-color: #dc3545; }
+
+            .card {
+                box-shadow: none !important;
+                border: 2px solid #dee2e6;
+                border-radius: 8px;
+                page-break-inside: avoid;
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #a4161a 0%, #dc143c 100%) !important;
+                color: white !important;
+                padding: 12px 15px !important;
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .table-scroll-wrapper {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            .table {
+                width: 100%;
+                font-size: 9px;
+                border-collapse: collapse;
+            }
+
+            .table thead th {
+                position: static !important;
+                background: #f8f9fa !important;
+                color: #000 !important;
+                font-weight: 700 !important;
+                padding: 10px 6px !important;
+                border: 1px solid #dee2e6 !important;
+                font-size: 10px !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .table tbody td {
+                padding: 8px 6px !important;
+                border: 1px solid #dee2e6 !important;
+                font-size: 9px;
+                color: #000;
+                line-height: 1.4;
+            }
+
+            .table tbody tr {
+                page-break-inside: avoid;
+            }
+
+            .table tbody tr:nth-child(even) {
+                background-color: #f9f9f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .badge {
+                padding: 4px 8px !important;
+                border-radius: 4px !important;
+                font-size: 8px !important;
+                font-weight: 600 !important;
+                border: 1px solid !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .badge.bg-success {
+                background-color: #d4edda !important;
+                color: #155724 !important;
+                border-color: #28a745 !important;
+            }
+
+            .badge.bg-warning {
+                background-color: #fff3cd !important;
+                color: #856404 !important;
+                border-color: #ffc107 !important;
+            }
+
+            .badge.bg-danger {
+                background-color: #f8d7da !important;
+                color: #721c24 !important;
+                border-color: #dc3545 !important;
+            }
+
+            .badge.bg-secondary {
+                background-color: #e2e3e5 !important;
+                color: #383d41 !important;
+                border-color: #6c757d !important;
+            }
+
+            /* Column widths */
+            .table th:nth-child(1), .table td:nth-child(1) { width: 4%; }
+            .table th:nth-child(2), .table td:nth-child(2) { width: 15%; }
+            .table th:nth-child(3), .table td:nth-child(3) { width: 8%; }
+            .table th:nth-child(4), .table td:nth-child(4) { width: 15%; }
+            .table th:nth-child(5), .table td:nth-child(5) { width: 11%; }
+            .table th:nth-child(6), .table td:nth-child(6) { width: 14%; }
+            .table th:nth-child(7), .table td:nth-child(7) { width: 20%; word-wrap: break-word; }
+            .table th:nth-child(8), .table td:nth-child(8) { width: 8%; }
+            .table th:nth-child(9), .table td:nth-child(9) { width: 11%; }
+
+            .print-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 9px;
+                color: #6c757d;
+                padding: 8px 0;
+                border-top: 1px solid #dee2e6;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        .table-scroll-wrapper {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .table-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f8f9fa;
+        }
+
+        .print-header {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-
     <div class="admin-content px-4 py-4">
         <div class="content-header d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-semibold text-dark mb-0">Reports & Analytics</h2>
@@ -179,7 +414,7 @@ foreach ($reservations as $res) {
             </div>
         </div>
 
-        <!-- Statistics Cards - FIXED: Changed from stats-card to card-stats -->
+        <!-- Statistics Cards -->
         <div class="row g-3 mb-4 no-print">
             <div class="col-lg-3 col-md-6">
                 <div class="card-stats bg-crimson text-white">
@@ -213,9 +448,9 @@ foreach ($reservations as $res) {
 
         <!-- Printable Report Area -->
         <div id="printable-area">
-            <!-- Print Header (only visible when printing) -->
+            <!-- Print Header -->
             <div class="print-header">
-                <h2>Gymnasium Reservation System</h2>
+                <h2>🏫 Gymnasium Reservation System</h2>
                 <h3>Reservation Report</h3>
                 <div class="print-info">
                     <p><strong>Generated:</strong> <?= date('F d, Y h:i A') ?></p>
@@ -227,12 +462,40 @@ foreach ($reservations as $res) {
                         </p>
                     <?php endif; ?>
                     <?php if ($filter_user): ?>
-                        <p><strong>User:</strong> <?= htmlspecialchars($users[array_search($filter_user, array_column($users, 'user_id'))]['name'] ?? 'N/A') ?></p>
+                        <p><strong>User:</strong> <?php
+                        $user_key = array_search($filter_user, array_column($users, 'user_id'));
+                        echo htmlspecialchars($user_key !== false ? $users[$user_key]['name'] : 'N/A');
+                        ?></p>
                     <?php endif; ?>
                     <?php if ($filter_facility): ?>
-                        <p><strong>Facility:</strong> <?= htmlspecialchars($facilities[array_search($filter_facility, array_column($facilities, 'facility_id'))]['name'] ?? 'N/A') ?></p>
+                        <p><strong>Facility:</strong> <?php
+                        $facility_key = array_search($filter_facility, array_column($facilities, 'facility_id'));
+                        echo htmlspecialchars($facility_key !== false ? $facilities[$facility_key]['name'] : 'N/A');
+                        ?></p>
                     <?php endif; ?>
-                    <p><strong>Total Records:</strong> <?= $total_reservations ?></p>
+                    <?php if ($filter_status && $filter_status !== 'all'): ?>
+                        <p><strong>Status Filter:</strong> <?= ucfirst($filter_status) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Print Summary Statistics -->
+            <div class="print-summary">
+                <div class="print-stat-box stat-total">
+                    <p>Total Records</p>
+                    <h4><?= $total_reservations ?></h4>
+                </div>
+                <div class="print-stat-box stat-pending">
+                    <p>Pending</p>
+                    <h4><?= $status_counts['pending'] ?></h4>
+                </div>
+                <div class="print-stat-box stat-approved">
+                    <p>Approved</p>
+                    <h4><?= $status_counts['approved'] ?></h4>
+                </div>
+                <div class="print-stat-box stat-denied">
+                    <p>Denied/Cancelled</p>
+                    <h4><?= $status_counts['denied'] + $status_counts['cancelled'] ?></h4>
                 </div>
             </div>
 
@@ -272,13 +535,13 @@ foreach ($reservations as $res) {
                                             <td><?= htmlspecialchars($row['purpose']) ?></td>
                                             <td>
                                                 <span class="badge bg-<?=
-                                                                        match ($row['status']) {
-                                                                            'approved' => 'success',
-                                                                            'denied' => 'danger',
-                                                                            'cancelled' => 'secondary',
-                                                                            default => 'warning'
-                                                                        };
-                                                                        ?>">
+                                                    match ($row['status']) {
+                                                        'approved' => 'success',
+                                                        'denied' => 'danger',
+                                                        'cancelled' => 'secondary',
+                                                        default => 'warning'
+                                                    };
+                                                ?>">
                                                     <?= ucfirst($row['status']) ?>
                                                 </span>
                                             </td>
@@ -295,14 +558,19 @@ foreach ($reservations as $res) {
                     </div>
                 </div>
             </div>
+
+            <!-- Print Footer -->
+            <div class="print-footer">
+                <p>Generated by Gymnasium Reservation System • <?= date('l, F d, Y - h:i A') ?> • Page {PAGE_NUM}</p>
+            </div>
         </div>
     </div>
+
     <script>
         // Notify parent frame about current page
         (function() {
             const currentPage = window.location.pathname.split('/').pop();
 
-            // Announce page on load
             function announcePage() {
                 if (window.parent !== window) {
                     window.parent.postMessage({
@@ -312,39 +580,14 @@ foreach ($reservations as $res) {
                 }
             }
 
-            // Announce immediately
             announcePage();
 
-            // Listen for parent's request
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
-
-            // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
-                const link = e.target.closest('a[href]');
-                if (!link) return;
-
-                const href = link.getAttribute('href');
-
-                // Check if it's an internal page navigation
-                if (href && !href.startsWith('http') && !href.startsWith('#') &&
-                    !href.includes('?action=') && href.endsWith('.php')) {
-
-                    // Announce the target page
-                    const targetPage = href.split('/').pop();
-                    if (window.parent !== window) {
-                        window.parent.postMessage({
-                            type: 'pageChanged',
-                            page: targetPage
-                        }, '*');
-                    }
-                }
-            });
         })();
     </script>
 </body>
-
 </html>

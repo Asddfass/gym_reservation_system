@@ -1,50 +1,6 @@
-@media print {
-    body * {
-        visibility: hidden;
-    }
+/* Enhanced Print Styles for Reports */
 
-    #printable-area,
-    #printable-area * {
-        visibility: visible;
-    }
-
-    #printable-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    .table {
-        font-size: 12px;
-    }
-
-    .table th,
-    .table td {
-        padding: 8px 6px;
-    }
-
-    .print-header {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .print-header h2 {
-        margin: 0;
-        font-size: 24px;
-    }
-
-    .print-info {
-        margin-bottom: 15px;
-        font-size: 11px;
-    }
-}
-
-/* Screen Styles */
+/* Screen Styles - Keep existing functionality */
 .table-scroll-wrapper {
     max-height: 50vh;
     overflow-y: auto;
@@ -70,8 +26,328 @@
     display: none;
 }
 
+/* ============================================
+   ENHANCED PRINT STYLES
+   ============================================ */
+
 @media print {
+    /* Reset page layout */
+    @page {
+        size: A4 landscape;
+        margin: 1.5cm 1cm;
+    }
+
+    /* Hide non-printable elements */
+    body * {
+        visibility: hidden;
+    }
+
+    #printable-area,
+    #printable-area * {
+        visibility: visible;
+    }
+
+    #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    /* ============================================
+       PRINT HEADER STYLING
+       ============================================ */
     .print-header {
         display: block;
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #a4161a;
     }
+
+    .print-header h2 {
+        margin: 0;
+        font-size: 28px;
+        color: #a4161a;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .print-header h3 {
+        margin: 8px 0 0 0;
+        font-size: 20px;
+        color: #660708;
+        font-weight: 600;
+    }
+
+    .print-info {
+        margin-top: 15px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+    }
+
+    .print-info p {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .print-info strong {
+        color: #a4161a;
+        font-weight: 600;
+    }
+
+    /* ============================================
+       CARD STYLING FOR PRINT
+       ============================================ */
+    .card {
+        box-shadow: none !important;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        overflow: visible;
+        page-break-inside: avoid;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #a4161a 0%, #dc143c 100%) !important;
+        color: white !important;
+        padding: 12px 15px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border-radius: 6px 6px 0 0 !important;
+    }
+
+    /* ============================================
+       TABLE STYLING FOR PRINT
+       ============================================ */
+    .table-scroll-wrapper {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+
+    .table {
+        width: 100%;
+        font-size: 9px;
+        border-collapse: collapse;
+        margin: 0;
+        page-break-inside: auto;
+    }
+
+    /* Sticky header removed for print */
+    .table thead th {
+        position: static !important;
+        background: #f8f9fa !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+        padding: 10px 6px !important;
+        border: 1px solid #dee2e6 !important;
+        text-align: left !important;
+        font-size: 10px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .table tbody td {
+        padding: 8px 6px !important;
+        border: 1px solid #dee2e6 !important;
+        vertical-align: top;
+        font-size: 9px;
+        line-height: 1.4;
+        color: #000;
+    }
+
+    /* Prevent rows from breaking across pages */
+    .table tbody tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    /* Zebra striping for better readability */
+    .table tbody tr:nth-child(even) {
+        background-color: #f9f9f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: white !important;
+    }
+
+    /* ============================================
+       BADGE STYLING FOR PRINT
+       ============================================ */
+    .badge {
+        padding: 4px 8px !important;
+        border-radius: 4px !important;
+        font-size: 8px !important;
+        font-weight: 600 !important;
+        border: 1px solid !important;
+        display: inline-block;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .badge.bg-success {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border-color: #28a745 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        border-color: #ffc107 !important;
+    }
+
+    .badge.bg-danger {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border-color: #dc3545 !important;
+    }
+
+    .badge.bg-secondary {
+        background-color: #e2e3e5 !important;
+        color: #383d41 !important;
+        border-color: #6c757d !important;
+    }
+
+    /* ============================================
+       PAGE BREAK CONTROL
+       ============================================ */
+    .page-break {
+        page-break-after: always;
+    }
+
+    /* Avoid breaking inside important elements */
+    .print-header,
+    .card {
+        page-break-inside: avoid;
+    }
+
+    /* ============================================
+       FOOTER FOR MULTI-PAGE PRINTS
+       ============================================ */
+    .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9px;
+        color: #6c757d;
+        padding: 8px 0;
+        border-top: 1px solid #dee2e6;
+    }
+
+    /* ============================================
+       COLUMN WIDTH OPTIMIZATION
+       ============================================ */
+    .table th:nth-child(1), /* No. */
+    .table td:nth-child(1) {
+        width: 4%;
+    }
+
+    .table th:nth-child(2), /* User */
+    .table td:nth-child(2) {
+        width: 15%;
+    }
+
+    .table th:nth-child(3), /* Role */
+    .table td:nth-child(3) {
+        width: 8%;
+    }
+
+    .table th:nth-child(4), /* Facility */
+    .table td:nth-child(4) {
+        width: 15%;
+    }
+
+    .table th:nth-child(5), /* Date */
+    .table td:nth-child(5) {
+        width: 11%;
+    }
+
+    .table th:nth-child(6), /* Time */
+    .table td:nth-child(6) {
+        width: 14%;
+    }
+
+    .table th:nth-child(7), /* Purpose */
+    .table td:nth-child(7) {
+        width: 20%;
+        word-wrap: break-word;
+    }
+
+    .table th:nth-child(8), /* Status */
+    .table td:nth-child(8) {
+        width: 8%;
+    }
+
+    .table th:nth-child(9), /* Created */
+    .table td:nth-child(9) {
+        width: 11%;
+    }
+
+    /* ============================================
+       TEXT WRAPPING AND OVERFLOW
+       ============================================ */
+    .table td {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    /* ============================================
+       GENERAL PRINT OPTIMIZATIONS
+       ============================================ */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /* Ensure colors print correctly */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Remove any transforms or transitions */
+    * {
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   PRINT BUTTON ENHANCEMENT
+   ============================================ */
+.btn-darkred {
+    transition: all 0.3s ease;
+}
+
+.btn-darkred:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(164, 22, 26, 0.3);
+}
+
+.btn-darkred i {
+    margin-right: 6px;
 }
