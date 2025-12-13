@@ -110,22 +110,19 @@ if (isset($_POST['reserve'])) {
                 "i"
             );
 
-            // ========================================
-            // UPDATED: Notification & Email Logic
-            // ========================================
-
-            // 1. Send in-app notifications to ALL admins
+            // 1. Send in-app notifications to ALL admins (NOW INCLUDING PURPOSE)
             $admins = $func->fetchAll("SELECT user_id, email, name FROM user WHERE role = 'admin'");
 
             foreach ($admins as $admin) {
-                // Create in-app notification for each admin
+                // Create in-app notification for each admin with purpose included
                 $notifManager->createNotification(
                     $admin['user_id'],
                     '📋 New Reservation Request',
                     "{$user['name']} has requested to reserve {$facility['name']} on " .
                         date('M d, Y', strtotime($prev['date'])) . " from " .
                         date('h:i A', strtotime($prev['start_time'])) . " to " .
-                        date('h:i A', strtotime($prev['end_time'])),
+                        date('h:i A', strtotime($prev['end_time'])) . 
+                        " for: {$prev['purpose']}",  // ← PURPOSE ADDED HERE
                     'info',
                     'manage_reservations.php'
                 );
@@ -144,8 +141,8 @@ if (isset($_POST['reserve'])) {
 
                 // Using Config class for admin email
                 $mailer->sendAdminNotificationEmail(
-                    Config::ADMIN_EMAIL,  // ← Single email from config
-                    Config::ADMIN_NAME,   // ← Admin name from config
+                    Config::ADMIN_EMAIL,
+                    Config::ADMIN_NAME,
                     $reservationDetails
                 );
 
@@ -446,7 +443,6 @@ if (isset($_POST['reserve'])) {
         (function() {
             const currentPage = window.location.pathname.split('/').pop();
 
-            // Announce page on load
             function announcePage() {
                 if (window.parent !== window) {
                     window.parent.postMessage({
@@ -456,28 +452,23 @@ if (isset($_POST['reserve'])) {
                 }
             }
 
-            // Announce immediately
             announcePage();
 
-            // Listen for parent's request
             window.addEventListener('message', function(event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
-            // Intercept navigation links (for "View details" etc.)
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 
                 const href = link.getAttribute('href');
 
-                // Check if it's an internal page navigation
                 if (href && !href.startsWith('http') && !href.startsWith('#') &&
                     !href.includes('?action=') && href.endsWith('.php')) {
 
-                    // Announce the target page
                     const targetPage = href.split('/').pop();
                     if (window.parent !== window) {
                         window.parent.postMessage({

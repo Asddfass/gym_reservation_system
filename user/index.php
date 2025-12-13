@@ -54,9 +54,9 @@ $user = $_SESSION['user'];
                 </div>
                 <?php include '../includes/notification_widget.php'; ?>
             </div>
-            <a href="../index.php" class="btn btn-light w-100">
+            <button type="button" class="btn btn-light w-100" id="logoutBtn">
                 <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
+            </button>
         </div>
     </div>
 
@@ -65,6 +65,34 @@ $user = $_SESSION['user'];
         <iframe id="content-frame" src="user_overview.php" frameborder="0" width="100%" height="100%" style="min-height: 100vh;"></iframe>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="logoutModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Logout
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-box-arrow-right" style="font-size: 3rem; color: #dc3545;"></i>
+                    <h5 class="mt-3">Are you sure you want to logout?</h5>
+                    <p class="text-muted">You will need to login again to access the system.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <a href="../index.php" class="btn btn-danger">
+                        <i class="bi bi-box-arrow-right"></i> Yes, Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Sidebar navigation logic
         const links = document.querySelectorAll('.nav-link');
@@ -118,6 +146,12 @@ $user = $_SESSION['user'];
             } catch (e) {
                 console.log('Could not communicate with iframe:', e);
             }
+        });
+
+        // Logout button handler
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+            logoutModal.show();
         });
     </script>
 </body>
