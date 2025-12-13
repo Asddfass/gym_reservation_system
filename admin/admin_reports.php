@@ -79,6 +79,18 @@ foreach ($reservations as $res) {
         $status_counts[$res['status']]++;
     }
 }
+
+// Get filter display names
+$filter_user_name = '';
+$filter_facility_name = '';
+if ($filter_user) {
+    $user_data = $fn->fetchOne("SELECT name FROM user WHERE user_id = ?", [$filter_user], "i");
+    $filter_user_name = $user_data['name'] ?? 'Unknown';
+}
+if ($filter_facility) {
+    $facility_data = $fn->fetchOne("SELECT name FROM facility WHERE facility_id = ?", [$filter_facility], "i");
+    $filter_facility_name = $facility_data['name'] ?? 'Unknown';
+}
 ?>
 
 <!DOCTYPE html>
@@ -93,7 +105,25 @@ foreach ($reservations as $res) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
     <style>
-        /* Enhanced Print Styles */
+        /* Screen Styles */
+        .table-scroll-wrapper {
+            max-height: 50vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .table-scroll-wrapper thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f8f9fa;
+        }
+
+        .print-header {
+            display: none;
+        }
+
+        /* Print Styles */
         @media print {
             @page {
                 size: A4 landscape;
@@ -121,35 +151,36 @@ foreach ($reservations as $res) {
                 display: none !important;
             }
 
+            /* Print Header */
             .print-header {
                 display: block;
                 text-align: center;
-                margin-bottom: 25px;
-                padding-bottom: 15px;
-                border-bottom: 3px solid #a4161a;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #a4161a;
             }
 
             .print-header h2 {
                 margin: 0;
-                font-size: 28px;
+                font-size: 22px;
                 color: #a4161a;
                 font-weight: 700;
             }
 
             .print-header h3 {
-                margin: 8px 0 0 0;
-                font-size: 20px;
+                margin: 5px 0 0 0;
+                font-size: 16px;
                 color: #660708;
                 font-weight: 600;
             }
 
             .print-info {
-                margin-top: 15px;
-                padding: 12px;
+                margin-top: 10px;
+                padding: 8px;
                 background: #f8f9fa;
-                border-radius: 8px;
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                border-radius: 6px;
+                display: flex;
+                flex-wrap: wrap;
                 gap: 10px;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -157,77 +188,75 @@ foreach ($reservations as $res) {
 
             .print-info p {
                 margin: 0;
-                font-size: 11px;
+                font-size: 10px;
                 color: #333;
+                flex: 0 0 auto;
             }
 
             .print-info strong {
                 color: #a4161a;
             }
 
-            .print-summary {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 10px;
-                margin-bottom: 20px;
-            }
 
-            .print-stat-box {
-                border: 2px solid #dee2e6;
-                border-radius: 6px;
-                padding: 10px;
-                text-align: center;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
 
-            .print-stat-box h4 {
-                font-size: 24px;
-                margin: 5px 0;
-                font-weight: 700;
-            }
-
-            .print-stat-box p {
-                font-size: 10px;
-                margin: 0;
-                color: #666;
-            }
-
-            .stat-total { border-color: #dc2f02; }
-            .stat-pending { border-color: #ffc107; }
-            .stat-approved { border-color: #28a745; }
-            .stat-denied { border-color: #dc3545; }
-
+            /* Card Styling */
             .card {
                 box-shadow: none !important;
                 border: 2px solid #dee2e6;
                 border-radius: 8px;
                 page-break-inside: avoid;
+                margin-top: 10px;
             }
 
             .card-header {
                 background: linear-gradient(135deg, #a4161a 0%, #dc143c 100%) !important;
                 color: white !important;
-                padding: 12px 15px !important;
-                font-size: 14px !important;
+                padding: 10px 12px !important;
+                font-size: 13px !important;
                 font-weight: 600 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
+            .card-body {
+                padding: 0 !important;
+            }
+
+            /* Table Styling */
             .table-scroll-wrapper {
                 max-height: none !important;
                 overflow: visible !important;
+                display: block !important;
             }
 
             .table-responsive {
                 overflow: visible !important;
+                display: block !important;
             }
 
             .table {
-                width: 100%;
+                width: 100% !important;
                 font-size: 9px;
                 border-collapse: collapse;
+                display: table !important;
+                margin: 0;
+            }
+
+            .table thead {
+                display: table-header-group !important;
+            }
+
+            .table tbody {
+                display: table-row-group !important;
+            }
+
+            .table tr {
+                display: table-row !important;
+            }
+
+            .table th,
+            .table td {
+                display: table-cell !important;
             }
 
             .table thead th {
@@ -235,19 +264,20 @@ foreach ($reservations as $res) {
                 background: #f8f9fa !important;
                 color: #000 !important;
                 font-weight: 700 !important;
-                padding: 10px 6px !important;
+                padding: 8px 5px !important;
                 border: 1px solid #dee2e6 !important;
-                font-size: 10px !important;
+                font-size: 9px !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
             .table tbody td {
-                padding: 8px 6px !important;
+                padding: 6px 5px !important;
                 border: 1px solid #dee2e6 !important;
-                font-size: 9px;
+                font-size: 8px;
                 color: #000;
-                line-height: 1.4;
+                line-height: 1.3;
+                vertical-align: top;
             }
 
             .table tbody tr {
@@ -260,6 +290,7 @@ foreach ($reservations as $res) {
                 print-color-adjust: exact;
             }
 
+            /* Badge Styling */
             .badge {
                 padding: 4px 8px !important;
                 border-radius: 4px !important;
@@ -305,38 +336,12 @@ foreach ($reservations as $res) {
             .table th:nth-child(8), .table td:nth-child(8) { width: 8%; }
             .table th:nth-child(9), .table td:nth-child(9) { width: 11%; }
 
-            .print-footer {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                text-align: center;
-                font-size: 9px;
-                color: #6c757d;
-                padding: 8px 0;
-                border-top: 1px solid #dee2e6;
-            }
+
 
             * {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-        }
-
-        .table-scroll-wrapper {
-            max-height: 50vh;
-            overflow-y: auto;
-        }
-
-        .table-scroll-wrapper thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #f8f9fa;
-        }
-
-        .print-header {
-            display: none;
         }
     </style>
 </head>
@@ -461,17 +466,11 @@ foreach ($reservations as $res) {
                             <?= $filter_date_to ? date('M d, Y', strtotime($filter_date_to)) : 'End' ?>
                         </p>
                     <?php endif; ?>
-                    <?php if ($filter_user): ?>
-                        <p><strong>User:</strong> <?php
-                        $user_key = array_search($filter_user, array_column($users, 'user_id'));
-                        echo htmlspecialchars($user_key !== false ? $users[$user_key]['name'] : 'N/A');
-                        ?></p>
+                    <?php if ($filter_user_name): ?>
+                        <p><strong>User:</strong> <?= htmlspecialchars($filter_user_name) ?></p>
                     <?php endif; ?>
-                    <?php if ($filter_facility): ?>
-                        <p><strong>Facility:</strong> <?php
-                        $facility_key = array_search($filter_facility, array_column($facilities, 'facility_id'));
-                        echo htmlspecialchars($facility_key !== false ? $facilities[$facility_key]['name'] : 'N/A');
-                        ?></p>
+                    <?php if ($filter_facility_name): ?>
+                        <p><strong>Facility:</strong> <?= htmlspecialchars($filter_facility_name) ?></p>
                     <?php endif; ?>
                     <?php if ($filter_status && $filter_status !== 'all'): ?>
                         <p><strong>Status Filter:</strong> <?= ucfirst($filter_status) ?></p>
@@ -479,25 +478,7 @@ foreach ($reservations as $res) {
                 </div>
             </div>
 
-            <!-- Print Summary Statistics -->
-            <div class="print-summary">
-                <div class="print-stat-box stat-total">
-                    <p>Total Records</p>
-                    <h4><?= $total_reservations ?></h4>
-                </div>
-                <div class="print-stat-box stat-pending">
-                    <p>Pending</p>
-                    <h4><?= $status_counts['pending'] ?></h4>
-                </div>
-                <div class="print-stat-box stat-approved">
-                    <p>Approved</p>
-                    <h4><?= $status_counts['approved'] ?></h4>
-                </div>
-                <div class="print-stat-box stat-denied">
-                    <p>Denied/Cancelled</p>
-                    <h4><?= $status_counts['denied'] + $status_counts['cancelled'] ?></h4>
-                </div>
-            </div>
+
 
             <!-- Report Table -->
             <div class="card shadow-sm">
@@ -559,10 +540,7 @@ foreach ($reservations as $res) {
                 </div>
             </div>
 
-            <!-- Print Footer -->
-            <div class="print-footer">
-                <p>Generated by Gymnasium Reservation System • <?= date('l, F d, Y - h:i A') ?> • Page {PAGE_NUM}</p>
-            </div>
+
         </div>
     </div>
 
