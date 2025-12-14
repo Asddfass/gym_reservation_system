@@ -44,6 +44,7 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
     <title>Notifications | Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
@@ -160,6 +161,11 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
             background: linear-gradient(135deg, #a4161a, #dc143c);
         }
 
+        /* Prevent layout shift when scrollbar appears/disappears */
+        #notificationsList {
+            min-height: 200px;
+        }
+
         .card-info {
             background: white;
             border-radius: 16px;
@@ -258,19 +264,18 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
             <?php else: ?>
                 <?php foreach ($notifications as $notif): ?>
                     <div class="card notification-card <?= $notif['is_read'] ? '' : 'unread' ?>"
-                        data-read="<?= $notif['is_read'] ?>"
-                        data-type="<?= $notif['type'] ?>">
+                        data-read="<?= $notif['is_read'] ?>" data-type="<?= $notif['type'] ?>">
                         <div class="card-body">
                             <div class="d-flex align-items-start">
                                 <div class="notification-icon <?= $notif['type'] ?> me-3">
                                     <i class="bi bi-<?=
-                                                    match ($notif['type']) {
-                                                        'success' => 'check-circle-fill',
-                                                        'error' => 'x-circle-fill',
-                                                        'warning' => 'exclamation-triangle-fill',
-                                                        default => 'info-circle-fill'
-                                                    }
-                                                    ?>"></i>
+                                        match ($notif['type']) {
+                                            'success' => 'check-circle-fill',
+                                            'error' => 'x-circle-fill',
+                                            'warning' => 'exclamation-triangle-fill',
+                                            default => 'info-circle-fill'
+                                        }
+                                        ?>"></i>
                                 </div>
 
                                 <div class="flex-grow-1">
@@ -284,24 +289,21 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
                                 <div class="d-flex gap-2">
                                     <?php if (!$notif['is_read']): ?>
                                         <a href="?action=mark_read&id=<?= $notif['notification_id'] ?>"
-                                            class="btn btn-sm btn-outline-success action-btn"
-                                            title="Mark as read">
+                                            class="btn btn-sm btn-outline-success action-btn" title="Mark as read">
                                             <i class="bi bi-check"></i>
                                         </a>
                                     <?php endif; ?>
 
                                     <?php if ($notif['link']): ?>
                                         <a href="<?= htmlspecialchars($notif['link']) ?>"
-                                            class="btn btn-sm btn-outline-primary action-btn"
-                                            title="View details">
+                                            class="btn btn-sm btn-outline-primary action-btn" title="View details">
                                             <i class="bi bi-arrow-right"></i>
                                         </a>
                                     <?php endif; ?>
 
                                     <a href="?action=delete&id=<?= $notif['notification_id'] ?>"
                                         class="btn btn-sm btn-outline-danger action-btn"
-                                        onclick="return confirm('Delete this notification?')"
-                                        title="Delete">
+                                        onclick="return confirm('Delete this notification?')" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -340,7 +342,7 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
         });
 
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -356,15 +358,22 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
             // Announce immediately
             announcePage();
 
+            // Also tell parent to refresh notification count (in case notifications were marked as read)
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'refreshNotificationCount'
+                }, '*');
+            }
+
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 
@@ -396,10 +405,14 @@ function timeAgo($datetime)
     $time = strtotime($datetime);
     $diff = time() - $time;
 
-    if ($diff < 60) return 'Just now';
-    if ($diff < 3600) return floor($diff / 60) . ' minutes ago';
-    if ($diff < 86400) return floor($diff / 3600) . ' hours ago';
-    if ($diff < 604800) return floor($diff / 86400) . ' days ago';
+    if ($diff < 60)
+        return 'Just now';
+    if ($diff < 3600)
+        return floor($diff / 60) . ' minutes ago';
+    if ($diff < 86400)
+        return floor($diff / 3600) . ' hours ago';
+    if ($diff < 604800)
+        return floor($diff / 86400) . ' days ago';
 
     return date('M d, Y', $time);
 }

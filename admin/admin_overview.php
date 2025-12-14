@@ -9,10 +9,42 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 }
 
 $fn = new Functions();
-$totalUsers = count($fn->fetchAll("SELECT * FROM user WHERE role != 'admin'"));
-$totalFacilities = count($fn->fetchAll("SELECT * FROM facility"));
-$totalReservations = count($fn->getReservations());
-$pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE status = 'pending'"));
+
+// Optimized COUNT(*) queries
+$totalUsers = $fn->getCount('user', "role != 'admin'");
+$totalFacilities = $fn->getCount('facility');
+$totalReservations = $fn->getCount('reservation');
+$pendingReservations = $fn->getCount('reservation', "status = 'pending'");
+
+// Chart Data: Reservations per day (last 7 days)
+$chartData = [];
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $count = $fn->fetchOne(
+        "SELECT COUNT(*) as count FROM reservation WHERE DATE(created_at) = ?",
+        [$date],
+        "s"
+    );
+    $chartData[] = [
+        'date' => date('M d', strtotime($date)),
+        'count' => (int) ($count['count'] ?? 0)
+    ];
+}
+
+// Chart Data: Reservations by status
+$statusData = $fn->fetchAll(
+    "SELECT status, COUNT(*) as count FROM reservation GROUP BY status"
+);
+
+// Chart Data: Facility usage (top 5)
+$facilityUsage = $fn->fetchAll(
+    "SELECT f.name, COUNT(r.reservation_id) as count 
+     FROM facility f 
+     LEFT JOIN reservation r ON f.facility_id = r.facility_id 
+     GROUP BY f.facility_id 
+     ORDER BY count DESC 
+     LIMIT 5"
+);
 ?>
 
 <!DOCTYPE html>
@@ -26,6 +58,7 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="../css/admin.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -35,6 +68,7 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
             <h2 class="fw-semibold text-dark mb-0">System Overview</h2>
         </div>
 
+        <!-- Stats Cards -->
         <div class="row g-3 mb-4">
             <div class="col-lg-3 col-md-6">
                 <div class="card-stats bg-crimson text-white shadow-sm w-100">
@@ -66,6 +100,45 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
             </div>
         </div>
 
+        <!-- Charts Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-darkred text-white fw-semibold">
+                        <i class="bi bi-graph-up"></i> Reservation Trends (Last 7 Days)
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trendsChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-darkred text-white fw-semibold">
+                        <i class="bi bi-pie-chart"></i> Status Distribution
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facility Usage Chart -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-darkred text-white fw-semibold">
+                        <i class="bi bi-bar-chart"></i> Top Facility Usage
+                    </div>
+                    <div class="card-body">
+                        <canvas id="facilityChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reservations Table -->
         <div class="card shadow-sm w-100">
             <div class="card-header bg-darkred text-white fw-semibold">Recent Reservations</div>
             <div class="card-body p-0">
@@ -87,23 +160,25 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
                                                  JOIN user u ON r.user_id = u.user_id
                                                  JOIN facility f ON r.facility_id = f.facility_id
                                                  WHERE r.created_at <= NOW()
-                                                 ORDER BY r.reservation_id DESC LIMIT 7");
+                                                 ORDER BY r.reservation_id DESC LIMIT 5");
                             if (!empty($recent)):
                                 foreach ($recent as $row): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($row['user_name']); ?></td>
                                         <td><?= htmlspecialchars($row['facility_name']); ?></td>
                                         <td><?= htmlspecialchars($row['date']); ?></td>
-                                        <td><?= htmlspecialchars($row['start_time']); ?> - <?= htmlspecialchars($row['end_time']); ?></td>
+                                        <td><?= htmlspecialchars($row['start_time']); ?> -
+                                            <?= htmlspecialchars($row['end_time']); ?>
+                                        </td>
                                         <td>
                                             <span class="badge bg-<?=
-                                                                    match ($row['status']) {
-                                                                        'approved' => 'success',
-                                                                        'denied' => 'danger',
-                                                                        'cancelled' => 'secondary',
-                                                                        default => 'warning'
-                                                                    };
-                                                                    ?>">
+                                                match ($row['status']) {
+                                                    'approved' => 'success',
+                                                    'denied' => 'danger',
+                                                    'cancelled' => 'secondary',
+                                                    default => 'warning'
+                                                };
+                                            ?>">
                                                 <?= ucfirst($row['status']); ?>
                                             </span>
                                         </td>
@@ -120,50 +195,137 @@ $pendingReservations = count($fn->fetchAll("SELECT * FROM reservation WHERE stat
             </div>
         </div>
     </div>
-    <script>
-        // Notify parent frame about current page
-        (function() {
-            const currentPage = window.location.pathname.split('/').pop();
 
-            // Announce page on load
-            function announcePage() {
-                if (window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'pageChanged',
-                        page: currentPage
-                    }, '*');
+    <script>
+        // Chart.js Configuration
+        const chartColors = {
+            primary: '#a4161a',
+            crimson: '#dc2f02',
+            gold: '#ffd60a',
+            success: '#28a745',
+            danger: '#dc3545',
+            warning: '#ffc107',
+            secondary: '#6c757d',
+            info: '#17a2b8'
+        };
+
+        // Reservation Trends Line Chart
+        const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: <?= json_encode(array_column($chartData, 'date')) ?>,
+                datasets: [{
+                    label: 'Reservations',
+                    data: <?= json_encode(array_column($chartData, 'count')) ?>,
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(164, 22, 26, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: chartColors.crimson,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
                 }
             }
+        });
 
-            // Announce immediately
+        // Status Distribution Doughnut Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusLabels = <?= json_encode(array_map(fn($s) => ucfirst($s['status']), $statusData)) ?>;
+        const statusCounts = <?= json_encode(array_column($statusData, 'count')) ?>;
+        const statusColors = statusLabels.map(label => {
+            switch (label.toLowerCase()) {
+                case 'approved': return chartColors.success;
+                case 'denied': return chartColors.danger;
+                case 'pending': return chartColors.warning;
+                case 'cancelled': return chartColors.secondary;
+                default: return chartColors.info;
+            }
+        });
+
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: statusColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15 }
+                    }
+                }
+            }
+        });
+
+        // Facility Usage Bar Chart
+        const facilityCtx = document.getElementById('facilityChart').getContext('2d');
+        new Chart(facilityCtx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode(array_column($facilityUsage, 'name')) ?>,
+                datasets: [{
+                    label: 'Reservations',
+                    data: <?= json_encode(array_column($facilityUsage, 'count')) ?>,
+                    backgroundColor: [
+                        chartColors.primary,
+                        chartColors.crimson,
+                        chartColors.gold,
+                        chartColors.success,
+                        chartColors.info
+                    ],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Notify parent frame about current page
+        (function () {
+            const currentPage = window.location.pathname.split('/').pop();
+            function announcePage() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'pageChanged', page: currentPage }, '*');
+                }
+            }
             announcePage();
-
-            // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
-                }
-            });
-
-            // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
-                const link = e.target.closest('a[href]');
-                if (!link) return;
-
-                const href = link.getAttribute('href');
-
-                // Check if it's an internal page navigation
-                if (href && !href.startsWith('http') && !href.startsWith('#') &&
-                    !href.includes('?action=') && href.endsWith('.php')) {
-
-                    // Announce the target page
-                    const targetPage = href.split('/').pop();
-                    if (window.parent !== window) {
-                        window.parent.postMessage({
-                            type: 'pageChanged',
-                            page: targetPage
-                        }, '*');
-                    }
                 }
             });
         })();

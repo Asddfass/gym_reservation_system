@@ -7,7 +7,7 @@ class Functions
 
     public function __construct()
     {
-        $this->db = new Database();
+        $this->db = Database::getInstance();
     }
 
     // Run a custom SQL query
@@ -42,6 +42,20 @@ class Functions
     {
         $stmt = $this->query($sql, $params, $types);
         return $stmt->affected_rows > 0;
+    }
+
+    /**
+     * Get count using optimized COUNT(*) query
+     * Much faster than count(fetchAll())
+     */
+    public function getCount($table, $condition = "", $params = [], $types = ""): int
+    {
+        $sql = "SELECT COUNT(*) as count FROM $table";
+        if ($condition) {
+            $sql .= " WHERE $condition";
+        }
+        $result = $this->fetchOne($sql, $params, $types);
+        return (int) ($result['count'] ?? 0);
     }
 
     // Check login credentials

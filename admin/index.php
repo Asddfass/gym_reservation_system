@@ -47,6 +47,9 @@ $user = $_SESSION['user'];
             <a href="#" class="nav-link" data-page="admin_reports.php">
                 <i class="bi bi-graph-up"></i> Reports & Analytics
             </a>
+            <a href="#" class="nav-link" data-page="calendar_view.php">
+                <i class="bi bi-calendar3"></i> Calendar View
+            </a>
             <a href="#" class="nav-link" data-page="manage_accounts.php">
                 <i class="bi bi-people"></i> Manage Accounts
             </a>
@@ -68,7 +71,8 @@ $user = $_SESSION['user'];
 
     <!-- Dynamic Content Area -->
     <div class="content">
-        <iframe id="content-frame" name="content-frame" src="admin_overview.php" frameborder="0" width="100%" height="100%" style="min-height: 100vh;"></iframe>
+        <iframe id="content-frame" name="content-frame" src="admin_overview.php" frameborder="0" width="100%"
+            height="100%" style="min-height: 100vh;"></iframe>
     </div>
 
     <!-- Logout Confirmation Modal -->
@@ -79,7 +83,8 @@ $user = $_SESSION['user'];
                     <h5 class="modal-title" id="logoutModalLabel">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Logout
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center py-4">
                     <i class="bi bi-box-arrow-right" style="font-size: 3rem; color: #dc3545;"></i>
@@ -111,6 +116,7 @@ $user = $_SESSION['user'];
             'manage_facilities.php': 'manage_facilities.php',
             'admin_reserve.php': 'admin_reserve.php',
             'admin_reports.php': 'admin_reports.php',
+            'calendar_view.php': 'calendar_view.php',
             'manage_accounts.php': 'manage_accounts.php',
             'notifications.php': 'notifications.php'
         };
@@ -136,7 +142,7 @@ $user = $_SESSION['user'];
         });
 
         // Listen for page change messages from iframe
-        window.addEventListener('message', function(event) {
+        window.addEventListener('message', function (event) {
             if (event.data && event.data.type === 'pageChanged') {
                 const pageName = event.data.page;
                 if (pageName && pageMapping[pageName]) {
@@ -146,7 +152,7 @@ $user = $_SESSION['user'];
         });
 
         // Monitor iframe load events
-        iframe.addEventListener('load', function() {
+        iframe.addEventListener('load', function () {
             // Send a request to iframe to announce its page
             try {
                 iframe.contentWindow.postMessage({
@@ -158,7 +164,7 @@ $user = $_SESSION['user'];
         });
 
         // Logout button handler
-        document.getElementById('logoutBtn').addEventListener('click', function() {
+        document.getElementById('logoutBtn').addEventListener('click', function () {
             const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
             logoutModal.show();
         });

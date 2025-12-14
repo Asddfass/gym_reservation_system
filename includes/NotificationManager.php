@@ -1,19 +1,19 @@
 <?php
 include_once 'database.php';
 
-class NotificationManager 
+class NotificationManager
 {
     protected $db;
 
-    public function __construct() 
+    public function __construct()
     {
-        $this->db = new Database();
+        $this->db = Database::getInstance();
     }
 
     /**
      * Create a new notification
      */
-    public function createNotification($user_id, $title, $message, $type = 'info', $link = null) 
+    public function createNotification($user_id, $title, $message, $type = 'info', $link = null)
     {
         $sql = "INSERT INTO notification (user_id, title, message, type, link) VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->db->conn->prepare($sql);
@@ -24,7 +24,7 @@ class NotificationManager
     /**
      * Get all notifications for a user
      */
-    public function getAllNotifications($user_id, $limit = 50) 
+    public function getAllNotifications($user_id, $limit = 50)
     {
         $sql = "SELECT * FROM notification WHERE user_id = ? ORDER BY created_at DESC LIMIT ?";
         $stmt = $this->db->conn->prepare($sql);
@@ -37,7 +37,7 @@ class NotificationManager
     /**
      * Get unread notifications count
      */
-    public function getUnreadCount($user_id) 
+    public function getUnreadCount($user_id)
     {
         $sql = "SELECT COUNT(*) as count FROM notification WHERE user_id = ? AND is_read = 0";
         $stmt = $this->db->conn->prepare($sql);
@@ -51,7 +51,7 @@ class NotificationManager
     /**
      * Get recent unread notifications
      */
-    public function getRecentUnread($user_id, $limit = 5) 
+    public function getRecentUnread($user_id, $limit = 5)
     {
         $sql = "SELECT * FROM notification WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT ?";
         $stmt = $this->db->conn->prepare($sql);
@@ -64,7 +64,7 @@ class NotificationManager
     /**
      * Mark notification as read
      */
-    public function markAsRead($notification_id, $user_id) 
+    public function markAsRead($notification_id, $user_id)
     {
         $sql = "UPDATE notification SET is_read = 1 WHERE notification_id = ? AND user_id = ?";
         $stmt = $this->db->conn->prepare($sql);
@@ -75,7 +75,7 @@ class NotificationManager
     /**
      * Mark all notifications as read
      */
-    public function markAllAsRead($user_id) 
+    public function markAllAsRead($user_id)
     {
         $sql = "UPDATE notification SET is_read = 1 WHERE user_id = ?";
         $stmt = $this->db->conn->prepare($sql);
@@ -86,7 +86,7 @@ class NotificationManager
     /**
      * Delete a notification
      */
-    public function deleteNotification($notification_id, $user_id) 
+    public function deleteNotification($notification_id, $user_id)
     {
         $sql = "DELETE FROM notification WHERE notification_id = ? AND user_id = ?";
         $stmt = $this->db->conn->prepare($sql);
@@ -97,7 +97,7 @@ class NotificationManager
     /**
      * Create notification for reservation status change
      */
-    public function notifyReservationStatus($user_id, $status, $facilityName, $date, $time) 
+    public function notifyReservationStatus($user_id, $status, $facilityName, $date, $time)
     {
         $statusMessages = [
             'approved' => [

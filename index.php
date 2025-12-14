@@ -4,30 +4,23 @@ include 'includes/functions.php';
 
 $fn = new Functions();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') 
-{
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email = trim($_POST['email']);
   $password = trim($_POST['password']);
 
   $user = $fn->checkLogin($email, $password);
 
-  if ($user) 
-  {
+  if ($user) {
     $_SESSION['user'] = $user;
 
     // Redirect based on role
-    if ($user['role'] === 'admin') 
-    {
+    if ($user['role'] === 'admin') {
       header("Location: admin/");
-    } 
-    else 
-    {
+    } else {
       header("Location: user/");
     }
     exit();
-  } 
-  else 
-  {
+  } else {
     $error = "Invalid email or password.";
   }
 }
@@ -35,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,15 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
           <label class="form-label" for="email">Email Address</label>
           <div class="input-wrapper">
             <i class="bi bi-envelope input-icon"></i>
-            <input 
-              type="email" 
-              name="email" 
-              id="email"
-              class="form-control" 
-              placeholder="Enter your email"
-              required
-              autocomplete="email"
-            >
+            <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required
+              autocomplete="email">
           </div>
         </div>
 
@@ -86,15 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
           <label class="form-label" for="password">Password</label>
           <div class="input-wrapper">
             <i class="bi bi-lock input-icon"></i>
-            <input 
-              type="password" 
-              name="password" 
-              id="password"
-              class="form-control" 
-              placeholder="Enter your password"
-              required
-              autocomplete="current-password"
-            >
+            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password"
+              required autocomplete="current-password">
           </div>
         </div>
 
@@ -117,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
   <script>
     // Add loading state to button on submit
-    document.getElementById('loginForm').addEventListener('submit', function() {
+    document.getElementById('loginForm').addEventListener('submit', function () {
       const btn = document.getElementById('loginBtn');
       btn.classList.add('loading');
       btn.querySelector('span').textContent = 'Signing in...';
@@ -129,4 +109,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     });
   </script>
 </body>
+
 </html>

@@ -95,6 +95,7 @@ if ($filter_facility) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -102,8 +103,15 @@ if ($filter_facility) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/theme.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    
+    <script>
+        (function () {
+            const theme = localStorage.getItem('gym_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
     <style>
         /* Screen Styles */
         .table-scroll-wrapper {
@@ -326,15 +334,51 @@ if ($filter_facility) {
             }
 
             /* Column widths */
-            .table th:nth-child(1), .table td:nth-child(1) { width: 4%; }
-            .table th:nth-child(2), .table td:nth-child(2) { width: 15%; }
-            .table th:nth-child(3), .table td:nth-child(3) { width: 8%; }
-            .table th:nth-child(4), .table td:nth-child(4) { width: 15%; }
-            .table th:nth-child(5), .table td:nth-child(5) { width: 11%; }
-            .table th:nth-child(6), .table td:nth-child(6) { width: 14%; }
-            .table th:nth-child(7), .table td:nth-child(7) { width: 20%; word-wrap: break-word; }
-            .table th:nth-child(8), .table td:nth-child(8) { width: 8%; }
-            .table th:nth-child(9), .table td:nth-child(9) { width: 11%; }
+            .table th:nth-child(1),
+            .table td:nth-child(1) {
+                width: 4%;
+            }
+
+            .table th:nth-child(2),
+            .table td:nth-child(2) {
+                width: 15%;
+            }
+
+            .table th:nth-child(3),
+            .table td:nth-child(3) {
+                width: 8%;
+            }
+
+            .table th:nth-child(4),
+            .table td:nth-child(4) {
+                width: 15%;
+            }
+
+            .table th:nth-child(5),
+            .table td:nth-child(5) {
+                width: 11%;
+            }
+
+            .table th:nth-child(6),
+            .table td:nth-child(6) {
+                width: 14%;
+            }
+
+            .table th:nth-child(7),
+            .table td:nth-child(7) {
+                width: 20%;
+                word-wrap: break-word;
+            }
+
+            .table th:nth-child(8),
+            .table td:nth-child(8) {
+                width: 8%;
+            }
+
+            .table th:nth-child(9),
+            .table td:nth-child(9) {
+                width: 11%;
+            }
 
 
 
@@ -379,7 +423,8 @@ if ($filter_facility) {
                         <select name="facility_id" id="facility_id" class="form-select">
                             <option value="">-- All Facilities --</option>
                             <?php foreach ($facilities as $facility): ?>
-                                <option value="<?= $facility['facility_id'] ?>" <?= $filter_facility == $facility['facility_id'] ? 'selected' : '' ?>>
+                                <option value="<?= $facility['facility_id'] ?>"
+                                    <?= $filter_facility == $facility['facility_id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($facility['name']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -388,22 +433,28 @@ if ($filter_facility) {
 
                     <div class="col-md-2">
                         <label for="date_from" class="form-label">Date From</label>
-                        <input type="date" name="date_from" id="date_from" class="form-control" value="<?= htmlspecialchars($filter_date_from) ?>">
+                        <input type="date" name="date_from" id="date_from" class="form-control"
+                            value="<?= htmlspecialchars($filter_date_from) ?>">
                     </div>
 
                     <div class="col-md-2">
                         <label for="date_to" class="form-label">Date To</label>
-                        <input type="date" name="date_to" id="date_to" class="form-control" value="<?= htmlspecialchars($filter_date_to) ?>">
+                        <input type="date" name="date_to" id="date_to" class="form-control"
+                            value="<?= htmlspecialchars($filter_date_to) ?>" <?= empty($filter_date_from) ? 'disabled' : '' ?>
+                            <?= !empty($filter_date_from) ? 'min="' . htmlspecialchars($filter_date_from) . '"' : '' ?>>
                     </div>
 
                     <div class="col-md-2">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-select">
-                            <option value="all" <?= $filter_status === 'all' || $filter_status === '' ? 'selected' : '' ?>>-- All Statuses --</option>
+                            <option value="all" <?= $filter_status === 'all' || $filter_status === '' ? 'selected' : '' ?>>--
+                                All Statuses --</option>
                             <option value="pending" <?= $filter_status === 'pending' ? 'selected' : '' ?>>Pending</option>
-                            <option value="approved" <?= $filter_status === 'approved' ? 'selected' : '' ?>>Approved</option>
+                            <option value="approved" <?= $filter_status === 'approved' ? 'selected' : '' ?>>Approved
+                            </option>
                             <option value="denied" <?= $filter_status === 'denied' ? 'selected' : '' ?>>Denied</option>
-                            <option value="cancelled" <?= $filter_status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                            <option value="cancelled" <?= $filter_status === 'cancelled' ? 'selected' : '' ?>>Cancelled
+                            </option>
                         </select>
                     </div>
 
@@ -512,7 +563,9 @@ if ($filter_facility) {
                                             <td><span class="badge bg-secondary"><?= ucfirst($row['user_role']) ?></span></td>
                                             <td><?= htmlspecialchars($row['facility_name']) ?></td>
                                             <td><?= date('M d, Y', strtotime($row['date'])) ?></td>
-                                            <td><?= date('h:i A', strtotime($row['start_time'])) ?> - <?= date('h:i A', strtotime($row['end_time'])) ?></td>
+                                            <td><?= date('h:i A', strtotime($row['start_time'])) ?> -
+                                                <?= date('h:i A', strtotime($row['end_time'])) ?>
+                                            </td>
                                             <td><?= htmlspecialchars($row['purpose']) ?></td>
                                             <td>
                                                 <span class="badge bg-<?=
@@ -531,7 +584,8 @@ if ($filter_facility) {
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="9" class="text-center text-muted py-3">No reservations found matching the selected filters.</td>
+                                        <td colspan="9" class="text-center text-muted py-3">No reservations found matching
+                                            the selected filters.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -545,8 +599,27 @@ if ($filter_facility) {
     </div>
 
     <script>
+        // Date validation: Date To depends on Date From
+        const dateFromInput = document.getElementById('date_from');
+        const dateToInput = document.getElementById('date_to');
+
+        dateFromInput.addEventListener('change', function () {
+            if (this.value) {
+                dateToInput.disabled = false;
+                dateToInput.min = this.value;
+                // Clear date_to if it's before the new date_from
+                if (dateToInput.value && dateToInput.value < this.value) {
+                    dateToInput.value = '';
+                }
+            } else {
+                dateToInput.disabled = true;
+                dateToInput.value = '';
+                dateToInput.min = '';
+            }
+        });
+
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             function announcePage() {
@@ -560,7 +633,7 @@ if ($filter_facility) {
 
             announcePage();
 
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
@@ -568,4 +641,5 @@ if ($filter_facility) {
         })();
     </script>
 </body>
+
 </html>

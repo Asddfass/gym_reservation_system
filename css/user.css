@@ -8,9 +8,9 @@
     --gold: #ffd60a;
     --bg-light: #f8f9fa;
     --text-dark: #212529;
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -18,6 +18,12 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+html,
+body {
+    overflow: hidden;
+    height: 100%;
 }
 
 body {
@@ -39,21 +45,21 @@ body {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
     transition: var(--transition);
 }
 
 .sidebar-header {
     padding: 2rem 1.5rem;
     text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-logo {
     height: 60px;
     margin-bottom: 1rem;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     transition: var(--transition);
 }
 
@@ -66,7 +72,7 @@ body {
     font-weight: 700;
     font-size: 1.25rem;
     letter-spacing: 0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-nav {
@@ -79,7 +85,7 @@ body {
     display: flex;
     align-items: center;
     padding: 1rem 1.5rem;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
@@ -96,15 +102,15 @@ body {
 }
 
 .nav-link:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: white;
     transform: translateX(5px);
 }
 
 .nav-link.active {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
     color: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .nav-link.active::before {
@@ -121,18 +127,18 @@ body {
 
 .sidebar-footer {
     padding: 1.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-footer p {
-    color: rgba(255,255,255,0.9);
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: 0;
     font-size: 0.9rem;
 }
 
 .sidebar-footer small {
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .sidebar-footer .btn {
@@ -168,6 +174,9 @@ body {
     padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 
 /* Header Section */
@@ -237,6 +246,52 @@ body {
     font-weight: 500;
 }
 
+/* Stats Cards - Matches Admin Styling */
+.card-stats {
+    background: white;
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.card-stats::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.card-stats:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-stats i {
+    font-size: 2.5rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.card-stats h4 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.card-stats p {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin: 0;
+    font-weight: 500;
+}
+
 /* Color Variants */
 .bg-crimson {
     background: linear-gradient(135deg, #dc2f02 0%, #e85d04 100%) !important;
@@ -289,23 +344,39 @@ body {
 }
 
 /* Tables */
-.table-responsive {
-    border-radius: 12px;
+.table-scroll-wrapper {
+    max-height: 450px;
     overflow: hidden;
+    position: relative;
+}
+
+.table-scroll-wrapper .table-responsive {
     max-height: 450px;
     overflow-y: auto;
+    overflow-x: auto;
+}
+
+.table-responsive {
+    border-radius: 12px;
 }
 
 .table {
     margin: 0;
     font-size: 0.95rem;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: white;
 }
 
 .table thead {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #f8f9fa;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 100;
+}
+
+.table thead tr {
+    background: #f8f9fa;
 }
 
 .table thead th {
@@ -316,16 +387,26 @@ body {
     font-size: 0.8rem;
     letter-spacing: 0.5px;
     color: var(--text-dark);
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.table tbody {
+    background: white;
 }
 
 .table tbody td {
     padding: 1rem;
     vertical-align: middle;
     border-bottom: 1px solid #f0f0f0;
+    background: white;
 }
 
 .table tbody tr {
     transition: var(--transition);
+    background: white;
 }
 
 .table tbody tr:hover {
@@ -345,13 +426,17 @@ body {
     cursor: pointer;
 }
 
-.btn-darkred, .btn-submit, .btn-manage {
+.btn-darkred,
+.btn-submit,
+.btn-manage {
     background: linear-gradient(135deg, var(--primary-red) 0%, var(--crimson) 100%);
     color: white;
     box-shadow: var(--shadow-sm);
 }
 
-.btn-darkred:hover, .btn-submit:hover, .btn-manage:hover {
+.btn-darkred:hover,
+.btn-submit:hover,
+.btn-manage:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     color: white;
@@ -367,7 +452,8 @@ body {
 }
 
 /* Form Elements */
-.form-control, .form-select {
+.form-control,
+.form-select {
     border: 2px solid #e9ecef;
     border-radius: 10px;
     padding: 0.75rem 1rem;
@@ -376,7 +462,8 @@ body {
     height: 48px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: var(--primary-red);
     box-shadow: 0 0 0 0.2rem rgba(164, 22, 26, 0.15);
     outline: none;
@@ -440,11 +527,11 @@ body {
         height: auto;
         position: relative;
     }
-    
+
     .content {
         margin-left: 0;
     }
-    
+
     .user-content {
         padding: 1rem;
     }
@@ -456,13 +543,16 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.card, .card-info {
+.card,
+.card-info,
+.card-stats {
     animation: fadeIn 0.5s ease-out;
 }
 

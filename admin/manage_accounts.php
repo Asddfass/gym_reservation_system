@@ -101,149 +101,164 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 
 <body>
     <div class="admin-content px-4 py-4">
-        <div class="content-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
-        </div>
+                    <div class="content-header d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
+                    </div>
 
-        <?php if ($message): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
-        <?php elseif ($error): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+                    <?php if ($message): ?>
+                        <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+                    <?php elseif ($error): ?>
+                        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                    <?php endif; ?>
 
-        <!-- Add Account -->
-        <div class="card mb-4">
-            <div class="card-header bg-darkred text-white fw-semibold">Add New Account</div>
-            <div class="card-body">
-                <form method="POST" class="row g-3">
-                    <div class="col-md-3">
-                        <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+                    <!-- Add Account -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-darkred text-white fw-semibold">Add New Account</div>
+                        <div class="card-body">
+                            <form method="POST" class="row g-3">
+                                <div class="col-md-3">
+                                    <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="role" class="form-select">
+                                        <option value="student">Student</option>
+                                        <option value="faculty">Faculty</option>
+                                        <option value="guest">Guest</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button type="submit" name="add_account" class="btn btn-manage w-100">Add</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <input type="email" name="email" class="form-control" placeholder="Email" required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="password" name="password" class="form-control" placeholder="Password" required>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="role" class="form-select">
-                            <option value="student">Student</option>
-                            <option value="faculty">Faculty</option>
-                            <option value="guest">Guest</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 text-end">
-                        <button type="submit" name="add_account" class="btn btn-manage w-100">Add</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Accounts Table -->
-        <div class="card">
-            <div class="card-header bg-darkred text-white fw-semibold">Existing Accounts</div>
-            <div class="card-body p-0">
-                <div class="table-container">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($accounts as $acc):
-                                $isEditing = (isset($_POST['edit_mode']) && $_POST['edit_mode'] == $acc['user_id']);
-                                $is_self = $acc['user_id'] == $current_user_id;
-                            ?>
-                                <tr>
-                                    <form method="POST">
-                                        <input type="hidden" name="user_id" value="<?= $acc['user_id'] ?>">
-                                        <td><?= $acc['user_id'] ?></td>
-                                        <td><input type="text" name="name" value="<?= htmlspecialchars($acc['name']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
-                                        <td><input type="email" name="email" value="<?= htmlspecialchars($acc['email']) ?>" class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>></td>
-                                        <td>
-                                            <select name="role" class="form-select form-select-sm" <?= $isEditing ? '' : 'disabled' ?>>
-                                                <?php foreach (['student', 'faculty', 'guest', 'admin'] as $r): ?>
-                                                    <option value="<?= $r ?>" <?= $acc['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
-                                        <td class="text-center">
-                                            <?php if ($isEditing): ?>
-                                                <div class="d-flex flex-column gap-2">
-                                                    <div class="d-flex justify-content-center gap-2">
-                                                        <button type="submit" name="save_edit" class="btn btn-sm btn-approve">Save</button>
-                                                        <button type="submit" name="cancel" class="btn btn-sm btn-cancel">Cancel</button>
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <input type="password" name="new_password" class="form-control form-control-sm mb-2" placeholder="New Password">
-                                                        <button type="submit" name="change_password" class="btn btn-sm btn-deny w-100">Change Password</button>
-                                                    </div>
-                                                </div>
-                                            <?php else: ?>
-                                                <div class="d-flex justify-content-center gap-2">
-                                                    <button type="submit" name="edit_mode" value="<?= $acc['user_id'] ?>" class="btn btn-sm btn-manage">Edit</button>
+                    <!-- Accounts Table -->
+                    <div class="card">
+                        <div class="card-header bg-darkred text-white fw-semibold">Existing Accounts</div>
+                        <div class="card-body p-0">
+                            <div class="table-container">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($accounts as $acc):
+                                            $isEditing = (isset($_POST['edit_mode']) && $_POST['edit_mode'] == $acc['user_id']);
+                                            $is_self = $acc['user_id'] == $current_user_id;
+                                            ?>
+                                            <tr>
+                                                <form method="POST">
+                                                    <input type="hidden" name="user_id" value="<?= $acc['user_id'] ?>">
+                                                        <td><?= $acc['user_id'] ?></td>
+                                                        <td><input type="text" name="name" value="<?= htmlspecialchars($acc['name']) ?>"
+                                                            class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>>
+                                                        </td>
+                                                        <td><input type="email" name="email" value="<?= htmlspecialchars($acc['email']) ?>"
+                                                            class="form-control form-control-sm" <?= $isEditing ? '' : 'readonly' ?>>
+                                                        </td>
+                                                        <td>
+                                                            <select name="role" class="form-select form-select-sm" <?= $isEditing ? '' : 'disabled' ?>>
+                                                                <?php foreach (['student', 'faculty', 'guest', 'admin'] as $r): ?>
+                                                                    <option value="<?= $r ?>" <?= $acc['role'] === $r ? 'selected' : '' ?>>
+                                                                        <?= ucfirst($r) ?>
+                                                                    </option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <?php if ($isEditing): ?>
+                                                                <div class="d-flex flex-column gap-2">
+                                                                    <div class="d-flex justify-content-center gap-2">
+                                                                        <button type="submit" name="save_edit"
+                                                                            class="btn btn-sm btn-approve">Save</button>
+                                                                        <button type="submit" name="cancel"
+                                                                            class="btn btn-sm btn-cancel">Cancel</button>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <input type="password" name="new_password"
+                                                                            class="form-control form-control-sm mb-2"
+                                                                            placeholder="New Password">
+                                                                            <button type="submit" name="change_password"
+                                                                                class="btn btn-sm btn-deny w-100">Change Password</button>
+                                                                    </div>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <div class="d-flex justify-content-center gap-2">
+                                                                    <button type="submit" name="edit_mode" value="<?= $acc['user_id'] ?>"
+                                                                        class="btn btn-sm btn-manage">Edit</button>
 
-                                                    <?php if ($is_self): ?>
-                                                        <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot delete your own account">Delete</button>
-                                                    <?php else: ?>
-                                                        <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this account?')">Delete</a>
-                                                    <?php endif; ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
-                                    </form>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                                                    <?php if ($is_self): ?>
+                                                                        <button type="button" class="btn btn-sm btn-secondary" disabled
+                                                                            title="Cannot delete your own account">Delete</button>
+                                                                    <?php else: ?>
+                                                                        <a href="?delete=<?= $acc['user_id'] ?>" class="btn btn-sm btn-danger"
+                                                                            onclick="return confirm('Delete this account?')">Delete</a>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                </form>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <script>
+                <script>
         // Notify parent frame about current page
-        (function() {
+                    (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
-            // Announce page on load
-            function announcePage() {
+                    // Announce page on load
+                    function announcePage() {
                 if (window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'pageChanged',
-                        page: currentPage
-                    }, '*');
+                        window.parent.postMessage({
+                            type: 'pageChanged',
+                            page: currentPage
+                        }, '*');
                 }
             }
 
-            // Announce immediately
-            announcePage();
-
-            // Listen for parent's request
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.type === 'requestPageInfo') {
+                    // Announce immediately
                     announcePage();
+
+                    // Listen for parent's request
+                    window.addEventListener('message', function (event) {
+                if (event.data && event.data.type === 'requestPageInfo') {
+                        announcePage();
                 }
             });
 
-            // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+                    // Intercept navigation links (for "View details" etc.)
+                    document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
-                if (!link) return;
+                    if (!link) return;
 
-                const href = link.getAttribute('href');
+                    const href = link.getAttribute('href');
 
-                // Check if it's an internal page navigation
-                if (href && !href.startsWith('http') && !href.startsWith('#') &&
+                    // Check if it's an internal page navigation
+                    if (href && !href.startsWith('http') && !href.startsWith('#') &&
                     !href.includes('?action=') && href.endsWith('.php')) {
 
                     // Announce the target page
@@ -258,6 +273,6 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
             });
         })();
     </script>
-</body>
+    </body>
 
 </html>
