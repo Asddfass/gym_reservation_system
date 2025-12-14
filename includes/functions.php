@@ -1,21 +1,20 @@
 <?php
 include_once 'Database.php';
 
-class Functions 
+class Functions
 {
     protected $db;
 
-    public function __construct() 
+    public function __construct()
     {
         $this->db = new Database();
     }
 
     // Run a custom SQL query
-    public function query($sql, $params = [], $types = "") 
+    public function query($sql, $params = [], $types = "")
     {
         $stmt = $this->db->conn->prepare($sql);
-        if ($params && $types) 
-        {
+        if ($params && $types) {
             $stmt->bind_param($types, ...$params);
         }
         $stmt->execute();
@@ -23,7 +22,7 @@ class Functions
     }
 
     // Fetch one row
-    public function fetchOne($sql, $params = [], $types = "") 
+    public function fetchOne($sql, $params = [], $types = "")
     {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
@@ -31,7 +30,7 @@ class Functions
     }
 
     // Fetch all rows
-    public function fetchAll($sql, $params = [], $types = "") 
+    public function fetchAll($sql, $params = [], $types = "")
     {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
@@ -39,23 +38,29 @@ class Functions
     }
 
     // Insert / Update / Delete
-    public function execute($sql, $params = [], $types = "") 
+    public function execute($sql, $params = [], $types = "")
     {
         $stmt = $this->query($sql, $params, $types);
         return $stmt->affected_rows > 0;
     }
 
     // Check login credentials
-    public function checkLogin($email, $password) 
+    public function checkLogin($email, $password)
     {
         $sql = "SELECT * FROM user WHERE email = ?";
         $user = $this->fetchOne($sql, [$email], "s");
 
-        if (!$user) return false;
+        if (!$user)
+            return false;
 
-        // Check both plain and hashed passwords
-        if ($user['password'] === $password || password_verify($password, $user['password'])) 
-        {
+        // Check plain text, SHA-256 hash (from database.sql), and bcrypt (password_hash)
+        $sha256Hash = hash('sha256', $password);
+
+        if (
+            $user['password'] === $password ||
+            $user['password'] === $sha256Hash ||
+            password_verify($password, $user['password'])
+        ) {
             return $user;
         }
 
@@ -69,8 +74,7 @@ class Functions
         $params = [];
         $types = "";
 
-        if ($status) 
-        {
+        if ($status) {
             $sql .= " WHERE availability_status = ?";
             $params[] = $status;
             $types = "s";
