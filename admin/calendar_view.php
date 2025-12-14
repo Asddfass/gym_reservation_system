@@ -73,7 +73,12 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
         }
 
         .fc-day-today {
-            background: rgba(255, 214, 10, 0.15) !important;
+            background: rgba(164, 22, 26, 0.08) !important;
+        }
+
+        /* Override today highlight in timeGrid views to be more subtle */
+        .fc-timegrid-col.fc-day-today {
+            background: rgba(164, 22, 26, 0.05) !important;
         }
 
         .legend-item {
@@ -178,6 +183,15 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                 // Time range settings for week/day views (matches reservation hours)
                 slotMinTime: '06:00:00',
                 slotMaxTime: '21:00:00',
+                // Show end time in events for timeGrid views
+                displayEventEnd: true,
+                eventTimeFormat: {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                },
+                // Current time indicator
+                nowIndicator: true,
                 events: '../api/calendar_api.php',
                 eventClick: function (info) {
                     const props = info.event.extendedProps;
