@@ -22,7 +22,7 @@ class Functions
     }
 
     // Fetch one row
-    public function fetchOne($sql, $params = [], $types = "")
+    public function fetchOne($sql, $params = [], $types = ""): ?array
     {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
@@ -30,7 +30,7 @@ class Functions
     }
 
     // Fetch all rows
-    public function fetchAll($sql, $params = [], $types = "")
+    public function fetchAll($sql, $params = [], $types = ""): array
     {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
