@@ -393,7 +393,10 @@ if ($filter_facility) {
 <body>
     <div class="admin-content px-4 py-4">
         <div class="content-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-semibold text-dark mb-0">Reports & Analytics</h2>
+            <div>
+                <h2 class="fw-semibold text-dark mb-0">Reports & Analytics</h2>
+                <p class="text-muted mb-0 mt-1">Generate and analyze reservation statistics and trends</p>
+            </div>
             <button onclick="window.print()" class="btn btn-darkred no-print">
                 <i class="bi bi-printer"></i> Print Report
             </button>

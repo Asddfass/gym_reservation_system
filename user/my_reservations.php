@@ -97,8 +97,8 @@ foreach ($reservations as $res) {
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
-            <h3 class="fw-semibold">My Reservations</h3>
-            <p class="text-muted mb-0">Review the status and details of your booked facilities.</p>
+            <h3 class="fw-semibold mb-0">My Reservations</h3>
+            <p class="text-muted mb-0 mt-1">Review the status and details of your booked facilities.</p>
         </div>
 
         <!-- Statistics Cards -->
@@ -193,7 +193,7 @@ foreach ($reservations as $res) {
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-list-task"></i> Reservation Details (<?= count($reservations) ?> Found)
                     </div>
                     <div class="table-scroll-wrapper">

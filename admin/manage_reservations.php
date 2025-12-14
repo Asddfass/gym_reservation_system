@@ -290,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
 
         <div class="content-body">
             <div class="card shadow-sm">
-                <div class="card-header">
+                <div class="card-header bg-darkred text-white fw-semibold">
                     <i class="bi bi-list-task"></i> Reservation Records (<?= count($reservations); ?> Found)
                 </div>
 

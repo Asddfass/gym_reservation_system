@@ -110,8 +110,8 @@ if (isset($_POST['change_password'])) {
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
-            <h3 class="fw-semibold">My Profile</h3>
-            <p class="text-muted mb-0">Manage your personal information and security settings.</p>
+            <h3 class="fw-semibold mb-0">My Profile</h3>
+            <p class="text-muted mb-0 mt-1">Manage your personal information and security settings.</p>
         </div>
 
         <?php if ($message): ?>
@@ -131,7 +131,7 @@ if (isset($_POST['change_password'])) {
         <div class="row g-4">
             <div class="col-lg-6">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-person-circle"></i> Update Personal Information
                     </div>
                     <div class="card-body">
@@ -140,20 +140,24 @@ if (isset($_POST['change_password'])) {
 
                             <div class="mb-3">
                                 <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($current_user['name']); ?>" required>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    value="<?= htmlspecialchars($current_user['name']); ?>" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($current_user['email']); ?>" required>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="<?= htmlspecialchars($current_user['email']); ?>" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="role" class="form-label">Role</label>
-                                <input type="text" class="form-control" id="role" value="<?= ucfirst(htmlspecialchars($current_user['role'])); ?>" disabled>
+                                <input type="text" class="form-control" id="role"
+                                    value="<?= ucfirst(htmlspecialchars($current_user['role'])); ?>" disabled>
                             </div>
 
-                            <button type="submit" name="update_profile" class="btn btn-darkred w-100 mt-2">Save Changes</button>
+                            <button type="submit" name="update_profile" class="btn btn-darkred w-100 mt-2">Save
+                                Changes</button>
                         </form>
                     </div>
                 </div>
@@ -161,27 +165,31 @@ if (isset($_POST['change_password'])) {
 
             <div class="col-lg-6">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-key-fill"></i> Change Password
                     </div>
                     <div class="card-body">
                         <form method="POST">
                             <div class="mb-3">
                                 <label for="current_password" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                <input type="password" class="form-control" id="current_password"
+                                    name="current_password" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                <input type="password" class="form-control" id="new_password" name="new_password"
+                                    required>
                             </div>
 
                             <div class="mb-4">
                                 <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" required>
                             </div>
 
-                            <button type="submit" name="change_password" class="btn btn-darkred w-100">Change Password</button>
+                            <button type="submit" name="change_password" class="btn btn-darkred w-100">Change
+                                Password</button>
                         </form>
                     </div>
                 </div>
@@ -191,7 +199,7 @@ if (isset($_POST['change_password'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -208,14 +216,14 @@ if (isset($_POST['change_password'])) {
             announcePage();
 
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 

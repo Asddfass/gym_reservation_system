@@ -172,8 +172,8 @@ $unreadCount = $notifManager->getUnreadCount($user_id);
         <div class="content-header mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="fw-semibold">Notifications</h3>
-                    <p class="text-muted mb-0">Stay updated with your reservations and system updates</p>
+                    <h3 class="fw-semibold mb-0">Notifications</h3>
+                    <p class="text-muted mb-0 mt-1">Stay updated with your reservations and system updates</p>
                 </div>
                 <?php if ($unreadCount > 0): ?>
                     <a href="?action=mark_all_read" class="btn btn-darkred">

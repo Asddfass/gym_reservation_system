@@ -55,7 +55,7 @@ foreach ($reservations as $res) {
 
     $events[] = [
         'id' => $res['reservation_id'],
-        'title' => $res['facility_name'] . ' - ' . $res['user_name'],
+        'title' => $res['facility_name'],
         'start' => $res['date'] . 'T' . $res['start_time'],
         'end' => $res['date'] . 'T' . $res['end_time'],
         'backgroundColor' => $color,
@@ -63,9 +63,11 @@ foreach ($reservations as $res) {
         'textColor' => $textColor,
         'extendedProps' => [
             'facility' => $res['facility_name'],
+            'facility_id' => $res['facility_id'],
             'user' => $res['user_name'],
             'purpose' => $res['purpose'],
             'status' => $res['status'],
+            'date' => $res['date'],
             'time' => date('h:i A', strtotime($res['start_time'])) . ' - ' . date('h:i A', strtotime($res['end_time']))
         ]
     ];

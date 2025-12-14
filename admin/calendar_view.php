@@ -47,8 +47,25 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
         .fc-event {
             cursor: pointer;
             border-radius: 6px !important;
-            padding: 2px 6px !important;
-            font-size: 0.85rem;
+            padding: 3px 8px !important;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 2px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        .fc-daygrid-event {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fc-daygrid-dot-event {
+            padding: 2px 4px !important;
+        }
+
+        .fc-daygrid-dot-event .fc-event-title {
+            font-weight: 600;
         }
 
         .fc-daygrid-day:hover {
@@ -136,7 +153,9 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a href="manage_reservations.php" class="btn btn-primary">Manage Reservations</a>
+                    <a href="manage_reservations.php" id="manageReservationsLink" class="btn btn-primary">
+                        <i class="bi bi-gear me-1"></i>Manage This Reservation
+                    </a>
                 </div>
             </div>
         </div>
@@ -156,6 +175,9 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
+                // Time range settings for week/day views (matches reservation hours)
+                slotMinTime: '06:00:00',
+                slotMaxTime: '21:00:00',
                 events: '../api/calendar_api.php',
                 eventClick: function (info) {
                     const props = info.event.extendedProps;
@@ -177,12 +199,26 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                         'pending': 'warning text-dark'
                     }[props.status];
 
+                    // Build the manage reservations link with filter parameters
+                    const filterParams = new URLSearchParams({
+                        facility_id: props.facility_id,
+                        date_from: props.date,
+                        date_to: props.date,
+                        status: props.status
+                    });
+                    document.getElementById('manageReservationsLink').href =
+                        'manage_reservations.php?' + filterParams.toString();
+
                     modal.show();
                 },
                 eventDidMount: function (info) {
-                    info.el.title = info.event.extendedProps.facility + '\n' +
-                        info.event.extendedProps.time + '\n' +
-                        'Status: ' + info.event.extendedProps.status;
+                    const props = info.event.extendedProps;
+                    const statusLabel = props.status.charAt(0).toUpperCase() + props.status.slice(1);
+                    info.el.title = '📍 ' + props.facility + '\n' +
+                        '🕐 ' + props.time + '\n' +
+                        '👤 Reserved by: ' + props.user + '\n' +
+                        '📝 Purpose: ' + props.purpose + '\n' +
+                        '📊 Status: ' + statusLabel;
                 },
                 height: 'auto',
                 dayMaxEvents: 3,

@@ -137,8 +137,8 @@ if (isset($_POST['reserve'])) {
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
-            <h3 class="fw-semibold">Reserve a Facility</h3>
-            <p class="text-muted mb-0">Select a facility, date, time, and duration for your reservation.</p>
+            <h3 class="fw-semibold mb-0">Reserve a Facility</h3>
+            <p class="text-muted mb-0 mt-1">Select a facility, date, time, and duration for your reservation.</p>
         </div>
 
         <?php if ($message): ?>
@@ -148,7 +148,7 @@ if (isset($_POST['reserve'])) {
         <?php endif; ?>
 
         <div class="card shadow-sm">
-            <div class="card-header bg-white fw-semibold">
+            <div class="card-header bg-darkred text-white fw-semibold">
                 <i class="bi bi-calendar-plus"></i> Reservation Form
             </div>
             <div class="card-body">
@@ -158,7 +158,8 @@ if (isset($_POST['reserve'])) {
                         <select name="facility_id" id="facility_id" class="form-select" required>
                             <option value="">-- Choose Facility --</option>
                             <?php foreach ($facilities as $facility): ?>
-                                <option value="<?= $facility['facility_id'] ?>" <?= $facility['facility_id'] == $prev['facility_id'] ? 'selected' : '' ?>>
+                                <option value="<?= $facility['facility_id'] ?>"
+                                    <?= $facility['facility_id'] == $prev['facility_id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($facility['name']) ?> (Cap: <?= $facility['capacity'] ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -167,23 +168,23 @@ if (isset($_POST['reserve'])) {
 
                     <div class="col-md-3">
                         <label for="date" class="form-label">Date</label>
-                        <input type="date" name="date" id="date" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($prev['date']) ?>"
-                            required <?= $prev['facility_id'] ? '' : 'disabled' ?>>
+                        <input type="date" name="date" id="date" class="form-control" min="<?= date('Y-m-d') ?>"
+                            value="<?= htmlspecialchars($prev['date']) ?>" required <?= $prev['facility_id'] ? '' : 'disabled' ?>>
                     </div>
 
                     <div class="col-md-3">
                         <label for="duration" class="form-label">Duration (days)</label>
-                        <input type="number" name="duration" id="duration" class="form-control" min="1" value="<?= htmlspecialchars($prev['duration']) ?>"
-                            required <?= $prev['facility_id'] ? '' : 'disabled' ?>>
+                        <input type="number" name="duration" id="duration" class="form-control" min="1"
+                            value="<?= htmlspecialchars($prev['duration']) ?>" required <?= $prev['facility_id'] ? '' : 'disabled' ?>>
                     </div>
 
                     <div class="col-md-3">
                         <label for="start_time" class="form-label">Start Time (06:00 - 16:00)</label>
-                        <select name="start_time" id="start_time" class="form-select"
-                            required <?= ($prev['facility_id'] && $prev['date']) ? '' : 'disabled' ?>>
+                        <select name="start_time" id="start_time" class="form-select" required <?= ($prev['facility_id'] && $prev['date']) ? '' : 'disabled' ?>>
                             <option value="">-- Select Start Time --</option>
                             <?php foreach ($start_time_slots as $time): ?>
-                                <option value="<?= $time ?>" <?= $prev['start_time'] == $time ? 'selected' : '' ?>><?= $time ?></option>
+                                <option value="<?= $time ?>" <?= $prev['start_time'] == $time ? 'selected' : '' ?>><?= $time ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -197,7 +198,8 @@ if (isset($_POST['reserve'])) {
 
                     <div class="col-md-6">
                         <label for="purpose" class="form-label">Purpose</label>
-                        <input type="text" name="purpose" class="form-control" placeholder="E.g., Pickle Ball Game" value="<?= htmlspecialchars($prev['purpose']) ?>" required>
+                        <input type="text" name="purpose" class="form-control" placeholder="E.g., Pickle Ball Game"
+                            value="<?= htmlspecialchars($prev['purpose']) ?>" required>
                     </div>
 
                     <div class="col-12 text-end">
@@ -440,7 +442,7 @@ if (isset($_POST['reserve'])) {
     </script>
     <script>
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -457,14 +459,14 @@ if (isset($_POST['reserve'])) {
             announcePage();
 
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 

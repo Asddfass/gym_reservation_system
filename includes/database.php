@@ -1,12 +1,14 @@
 <?php
+require_once __DIR__ . '/config.php';
+
 class Database
 {
     private static $instance = null;
 
-    private $host = "localhost";
-    private $user = "root";
-    private $pass = "";
-    private $dbname = "gym_reservation";
+    private $host;
+    private $user;
+    private $pass;
+    private $dbname;
 
     public $conn;
 
@@ -15,6 +17,10 @@ class Database
      */
     private function __construct()
     {
+        $this->host = Config::DB_HOST;
+        $this->user = Config::DB_USER;
+        $this->pass = Config::DB_PASS;
+        $this->dbname = Config::DB_NAME;
         $this->connect();
     }
 

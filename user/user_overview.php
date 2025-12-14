@@ -49,7 +49,8 @@ $available_facilities = $func->fetchAll("
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
-            <h3 class="fw-semibold">Dashboard Overview</h3>
+            <h3 class="fw-semibold mb-0">Dashboard Overview</h3>
+            <p class="text-muted mb-0 mt-1">View your reservation statistics and available facilities</p>
         </div>
 
         <!-- Dashboard Cards -->
@@ -89,7 +90,7 @@ $available_facilities = $func->fetchAll("
             <!-- Recent Reservations -->
             <div class="col-lg-6 col-12">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-semibold">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-clock-history"></i> Recent Reservations
                     </div>
                     <div class="card-body table-responsive">
@@ -113,7 +114,8 @@ $available_facilities = $func->fetchAll("
                                             <td><?= htmlspecialchars($row['start_time']); ?></td>
                                             <td><?= htmlspecialchars($row['end_time']); ?></td>
                                             <td>
-                                                <span class="badge 
+                                                <span
+                                                    class="badge 
                                                     <?= $row['status'] === 'approved' ? 'bg-success' : ($row['status'] === 'pending' ? 'bg-warning text-dark' : ($row['status'] === 'cancelled' ? 'bg-secondary' : 'bg-danger')); ?>">
                                                     <?= ucfirst($row['status']); ?>
                                                 </span>
@@ -133,7 +135,7 @@ $available_facilities = $func->fetchAll("
             <!-- Available Facilities -->
             <div class="col-lg-6 col-12">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-semibold">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-building"></i> Available Facilities
                     </div>
                     <div class="card-body table-responsive">
@@ -151,7 +153,9 @@ $available_facilities = $func->fetchAll("
                                         <tr>
                                             <td><?= htmlspecialchars($facility['name']); ?></td>
                                             <td><?= htmlspecialchars($facility['capacity']); ?></td>
-                                            <td><span class="badge bg-success"><?= htmlspecialchars($facility['availability_status']); ?></span></td>
+                                            <td><span
+                                                    class="badge bg-success"><?= htmlspecialchars($facility['availability_status']); ?></span>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -169,7 +173,7 @@ $available_facilities = $func->fetchAll("
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script>
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -186,14 +190,14 @@ $available_facilities = $func->fetchAll("
             announcePage();
 
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 

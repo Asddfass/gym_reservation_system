@@ -78,8 +78,8 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
 <body>
     <div class="user-content container-fluid px-4 py-4">
         <div class="content-header mb-4">
-            <h3 class="fw-semibold">My Reservations</h3>
-            <p class="text-muted mb-0">Review the status and details of your booked facilities.</p>
+            <h3 class="fw-semibold mb-0">My Reservations</h3>
+            <p class="text-muted mb-0 mt-1">Review the status and details of your booked facilities.</p>
         </div>
 
         <div class="card shadow-sm mb-4">
@@ -88,12 +88,14 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
 
                     <div class="col-md-4">
                         <label for="facility" class="form-label">Search Facility Name</label>
-                        <input type="text" name="facility" id="facility" class="form-control" placeholder="E.g., Gymn, Court" value="<?= htmlspecialchars($search_facility); ?>">
+                        <input type="text" name="facility" id="facility" class="form-control"
+                            placeholder="E.g., Gymn, Court" value="<?= htmlspecialchars($search_facility); ?>">
                     </div>
 
                     <div class="col-md-3">
                         <label for="date" class="form-label">Filter by Date</label>
-                        <input type="date" name="date" id="date" class="form-control" value="<?= htmlspecialchars($filter_date); ?>">
+                        <input type="date" name="date" id="date" class="form-control"
+                            value="<?= htmlspecialchars($filter_date); ?>">
                     </div>
 
                     <div class="col-md-3">
@@ -122,7 +124,7 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white fw-semibold">
+                    <div class="card-header bg-darkred text-white fw-semibold">
                         <i class="bi bi-list-task"></i> Reservation Details
                     </div>
                     <div class="card-body table-responsive">
@@ -148,7 +150,8 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
                                             <td><?= $idnum; ?></td>
                                             <td><?= htmlspecialchars($row['facility_name']); ?></td>
                                             <td><?= date('M d, Y', strtotime($row['date'])); ?></td>
-                                            <td><?= date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?></td>
+                                            <td><?= date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?>
+                                            </td>
                                             <td><?= htmlspecialchars($row['purpose']); ?></td>
                                             <td>
                                                 <?php
@@ -182,7 +185,7 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
     </div>
     <script>
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -199,14 +202,14 @@ $statuses = ['all', 'pending', 'approved', 'cancelled'];
             announcePage();
 
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 

@@ -72,7 +72,10 @@ $facilities = $fn->getFacilities();
     <div class="admin-content px-4 py-4">
 
         <div class="content-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-semibold text-dark mb-0">Manage Facilities</h2>
+            <div>
+                <h2 class="fw-semibold text-dark mb-0">Manage Facilities</h2>
+                <p class="text-muted mb-0 mt-1">Add, edit, and manage gym facilities and their availability</p>
+            </div>
         </div>
 
         <?php if (!empty($message)): ?>

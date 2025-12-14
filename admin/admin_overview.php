@@ -65,7 +65,10 @@ $facilityUsage = $fn->fetchAll(
 
     <div class="admin-content px-4 py-4">
         <div class="content-header d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-semibold text-dark mb-0">System Overview</h2>
+            <div>
+                <h2 class="fw-semibold text-dark mb-0">System Overview</h2>
+                <p class="text-muted mb-0 mt-1">Monitor key metrics, trends, and recent activity</p>
+            </div>
         </div>
 
         <!-- Stats Cards -->

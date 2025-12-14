@@ -107,7 +107,10 @@ $accounts = $fn->fetchAll("SELECT * FROM user");
 <body>
     <div class="admin-content px-4 py-4">
                     <div class="content-header d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
+                        <div>
+                            <h2 class="fw-semibold text-dark mb-0">Manage Accounts</h2>
+                            <p class="text-muted mb-0 mt-1">Add, edit, and manage user accounts and roles</p>
+                        </div>
                     </div>
 
                     <?php if ($message): ?>
