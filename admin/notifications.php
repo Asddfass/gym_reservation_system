@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/Database.php';
+include '../includes/database.php';
 include '../includes/functions.php';
 include '../includes/NotificationManager.php';
 

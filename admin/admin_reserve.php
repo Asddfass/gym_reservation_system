@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/Database.php';
+include '../includes/database.php';
 include '../includes/functions.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
