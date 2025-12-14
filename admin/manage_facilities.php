@@ -120,29 +120,29 @@ $facilities = $fn->getFacilities();
                     </thead>
                     <tbody>
                         <?php if (!empty($facilities)): ?>
-                            <?php foreach ($facilities as $f): ?>
+                            <?php
+                            $idnum = 1;
+
+                            foreach ($facilities as $f): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($f['facility_id']); ?></td>
+                                    <td><?= htmlspecialchars($idnum++); ?></td>
                                     <td><?= htmlspecialchars($f['name']); ?></td>
                                     <td><?= htmlspecialchars($f['capacity']); ?></td>
                                     <td>
-                                        <span class="badge bg-<?= $f['availability_status'] === 'available' ? 'success' : 'secondary'; ?>">
+                                        <span
+                                            class="badge bg-<?= $f['availability_status'] === 'available' ? 'success' : 'secondary'; ?>">
                                             <?= ucfirst($f['availability_status']); ?>
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <button
-                                            class="btn btn-sm btn-warning me-1 edit-btn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editModal"
-                                            data-id="<?= $f['facility_id']; ?>"
+                                        <button class="btn btn-sm btn-warning me-1 edit-btn" data-bs-toggle="modal"
+                                            data-bs-target="#editModal" data-id="<?= $f['facility_id']; ?>"
                                             data-name="<?= htmlspecialchars($f['name']); ?>"
                                             data-capacity="<?= $f['capacity']; ?>"
                                             data-status="<?= $f['availability_status']; ?>">
                                             Edit
                                         </button>
-                                        <a href="?delete=<?= $f['facility_id']; ?>"
-                                            class="btn btn-sm btn-danger"
+                                        <a href="?delete=<?= $f['facility_id']; ?>" class="btn btn-sm btn-danger"
                                             onclick="return confirm('Delete this facility?')">
                                             Delete
                                         </a>
@@ -166,7 +166,8 @@ $facilities = $fn->getFacilities();
             <form method="POST" class="modal-content rounded-4">
                 <div class="modal-header bg-accent text-white">
                     <h5 class="modal-title" id="editModalLabel">Edit Facility</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-light">
                     <input type="hidden" name="facility_id" id="edit_id">
@@ -205,7 +206,7 @@ $facilities = $fn->getFacilities();
         });
 
         // Notify parent frame about current page
-        (function() {
+        (function () {
             const currentPage = window.location.pathname.split('/').pop();
 
             // Announce page on load
@@ -222,14 +223,14 @@ $facilities = $fn->getFacilities();
             announcePage();
 
             // Listen for parent's request
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', function (event) {
                 if (event.data && event.data.type === 'requestPageInfo') {
                     announcePage();
                 }
             });
 
             // Intercept navigation links (for "View details" etc.)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const link = e.target.closest('a[href]');
                 if (!link) return;
 
