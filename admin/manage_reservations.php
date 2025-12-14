@@ -353,26 +353,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
                                             <td><?= date("M d, Y", strtotime($row['created_at'])); ?></td>
                                             <td class="text-center">
                                                 <?php if ($row['status'] === 'pending'): ?>
-                                                    <form method="POST" action="" class="d-inline">
-                                                        <input type="hidden" name="id" value="<?= $row['reservation_id']; ?>">
-                                                        <button name="action" value="approve" class="btn btn-sm btn-approve me-1"
-                                                            title="Approve this reservation">
-                                                            <i class="bi bi-check-lg"></i> Approve
-                                                        </button>
-                                                        <button name="action" value="deny" class="btn btn-sm btn-deny"
-                                                            title="Deny this reservation">
-                                                            <i class="bi bi-x-lg"></i> Deny
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-approve me-1"
+                                                        title="Approve this reservation"
+                                                        onclick="showConfirmModal('approve', <?= $row['reservation_id']; ?>, '<?= htmlspecialchars($row['user_name'], ENT_QUOTES); ?>', '<?= htmlspecialchars($row['facility_name'], ENT_QUOTES); ?>', '<?= date('M d, Y', strtotime($row['date'])); ?>', '<?= date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?>')">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-deny"
+                                                        title="Deny this reservation"
+                                                        onclick="showConfirmModal('deny', <?= $row['reservation_id']; ?>, '<?= htmlspecialchars($row['user_name'], ENT_QUOTES); ?>', '<?= htmlspecialchars($row['facility_name'], ENT_QUOTES); ?>', '<?= date('M d, Y', strtotime($row['date'])); ?>', '<?= date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?>')">
+                                                        <i class="bi bi-x-lg"></i> Deny
+                                                    </button>
                                                 <?php elseif ($row['status'] === 'approved'): ?>
-                                                    <form method="POST" action="" class="d-inline"
-                                                        onsubmit="return confirm('Are you sure you want to cancel this APPROVED reservation?');">
-                                                        <input type="hidden" name="id" value="<?= $row['reservation_id']; ?>">
-                                                        <button name="action" value="cancel" class="btn btn-sm btn-cancel"
-                                                            title="Cancel this reservation">
-                                                            <i class="bi bi-x-circle"></i> Cancel
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-cancel"
+                                                        title="Cancel this reservation"
+                                                        onclick="showConfirmModal('cancel', <?= $row['reservation_id']; ?>, '<?= htmlspecialchars($row['user_name'], ENT_QUOTES); ?>', '<?= htmlspecialchars($row['facility_name'], ENT_QUOTES); ?>', '<?= date('M d, Y', strtotime($row['date'])); ?>', '<?= date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?>')">
+                                                        <i class="bi bi-x-circle"></i> Cancel
+                                                    </button>
                                                 <?php else: ?>
                                                     <span class="badge bg-light text-muted">No actions available</span>
                                                 <?php endif; ?>
@@ -395,6 +391,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
         </div>
     </div>
 
+    <!-- Confirmation Modal for Deny/Cancel -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" id="modalHeader">
+                    <h5 class="modal-title" id="confirmActionModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span id="modalTitle">Confirm Action</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage" class="mb-3 fw-semibold"></p>
+                    <div class="reservation-details bg-light rounded p-3">
+                        <div class="row g-2">
+                            <div class="col-4 text-muted"><i class="bi bi-person"></i> User:</div>
+                            <div class="col-8 fw-semibold" id="modalUserName"></div>
+                            <div class="col-4 text-muted"><i class="bi bi-building"></i> Facility:</div>
+                            <div class="col-8 fw-semibold" id="modalFacility"></div>
+                            <div class="col-4 text-muted"><i class="bi bi-calendar"></i> Date:</div>
+                            <div class="col-8 fw-semibold" id="modalDate"></div>
+                            <div class="col-4 text-muted"><i class="bi bi-clock"></i> Time:</div>
+                            <div class="col-8 fw-semibold" id="modalTime"></div>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 mb-0" id="modalWarning">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span id="modalWarningText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left"></i> Go Back
+                    </button>
+                    <form method="POST" action="" id="confirmActionForm" class="d-inline">
+                        <input type="hidden" name="id" id="confirmReservationId">
+                        <button type="submit" name="action" id="confirmActionBtn" value="" class="btn">
+                            <i class="bi" id="confirmActionIcon"></i>
+                            <span id="confirmActionText"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .avatar-circle {
             width: 32px;
@@ -408,8 +450,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
             font-weight: 600;
             font-size: 0.9rem;
         }
+
+        /* Modal Styles */
+        #confirmActionModal .modal-header.approve-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        #confirmActionModal .modal-header.deny-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        #confirmActionModal .modal-header.cancel-header {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+        }
+
+        #confirmActionModal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        #confirmActionModal .reservation-details {
+            border-left: 4px solid #a4161a;
+        }
+
+        #confirmActionModal .btn-deny-confirm {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+        }
+
+        #confirmActionModal .btn-deny-confirm:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            color: white;
+        }
+
+        #confirmActionModal .btn-cancel-confirm {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            border: none;
+        }
+
+        #confirmActionModal .btn-cancel-confirm:hover {
+            background: linear-gradient(135deg, #5a6268, #545b62);
+            color: white;
+        }
+
+        #confirmActionModal .btn-approve-confirm {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+        }
+
+        #confirmActionModal .btn-approve-confirm:hover {
+            background: linear-gradient(135deg, #218838, #1ea886);
+            color: white;
+        }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Confirmation Modal Function
+        function showConfirmModal(action, reservationId, userName, facility, date, time) {
+            const modal = document.getElementById('confirmActionModal');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalUserName = document.getElementById('modalUserName');
+            const modalFacility = document.getElementById('modalFacility');
+            const modalDate = document.getElementById('modalDate');
+            const modalTime = document.getElementById('modalTime');
+            const modalWarningText = document.getElementById('modalWarningText');
+            const confirmReservationId = document.getElementById('confirmReservationId');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            const confirmActionIcon = document.getElementById('confirmActionIcon');
+            const confirmActionText = document.getElementById('confirmActionText');
+
+            // Set reservation details
+            modalUserName.textContent = userName;
+            modalFacility.textContent = facility;
+            modalDate.textContent = date;
+            modalTime.textContent = time;
+            confirmReservationId.value = reservationId;
+            confirmActionBtn.value = action;
+
+            // Customize based on action type
+            modalHeader.classList.remove('approve-header', 'deny-header', 'cancel-header');
+
+            if (action === 'approve') {
+                modalHeader.classList.add('approve-header');
+                modalTitle.textContent = 'Approve Reservation';
+                modalMessage.textContent = 'Are you sure you want to approve this reservation?';
+                modalWarningText.textContent = 'The user will be notified via email that their reservation has been approved.';
+                confirmActionBtn.className = 'btn btn-approve-confirm';
+                confirmActionIcon.className = 'bi bi-check-lg me-1';
+                confirmActionText.textContent = 'Yes, Approve Reservation';
+            } else if (action === 'deny') {
+                modalHeader.classList.add('deny-header');
+                modalTitle.textContent = 'Deny Reservation';
+                modalMessage.textContent = 'Are you sure you want to deny this reservation?';
+                modalWarningText.textContent = 'The user will be notified via email that their reservation request has been denied.';
+                confirmActionBtn.className = 'btn btn-deny-confirm';
+                confirmActionIcon.className = 'bi bi-x-lg me-1';
+                confirmActionText.textContent = 'Yes, Deny Reservation';
+            } else if (action === 'cancel') {
+                modalHeader.classList.add('cancel-header');
+                modalTitle.textContent = 'Cancel Approved Reservation';
+                modalMessage.textContent = 'Are you sure you want to cancel this APPROVED reservation?';
+                modalWarningText.textContent = 'This will cancel an already approved reservation. The user will be notified via email.';
+                confirmActionBtn.className = 'btn btn-cancel-confirm';
+                confirmActionIcon.className = 'bi bi-x-circle me-1';
+                confirmActionText.textContent = 'Yes, Cancel Reservation';
+            }
+
+            // Show the modal
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
         // Date validation: Date To depends on Date From
         const dateFromInput = document.getElementById('date_from');
         const dateToInput = document.getElementById('date_to');
