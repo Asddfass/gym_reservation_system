@@ -8,21 +8,21 @@ use PHPMailer\PHPMailer\Exception;
 class Mailer
 {
     private $mail;
-    
+
     public function __construct()
     {
         $this->mail = new PHPMailer(true);
-        
+
         try {
             // Server settings - Using Config class
             $this->mail->isSMTP();
-            $this->mail->Host       = Config::SMTP_HOST;
-            $this->mail->SMTPAuth   = true;
-            $this->mail->Username   = Config::SMTP_USERNAME;
-            $this->mail->Password   = Config::SMTP_PASSWORD;
+            $this->mail->Host = Config::SMTP_HOST;
+            $this->mail->SMTPAuth = true;
+            $this->mail->Username = Config::SMTP_USERNAME;
+            $this->mail->Password = Config::SMTP_PASSWORD;
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $this->mail->Port       = Config::SMTP_PORT;
-            
+            $this->mail->Port = Config::SMTP_PORT;
+
             // Sender info - Using Config class
             $this->mail->setFrom(Config::SMTP_FROM_EMAIL, Config::SMTP_FROM_NAME);
             $this->mail->isHTML(true);
@@ -30,24 +30,24 @@ class Mailer
             error_log("Mailer Error: {$this->mail->ErrorInfo}");
         }
     }
-    
+
     public function sendReservationEmail($to, $name, $reservationDetails, $status)
     {
-        $to = "alihassansali@gmail.com"; // TEMPORARY USE
+        //$to = "alihassansali@gmail.com"; // TEMPORARY USE
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to, $name);
-            
+
             $statusText = ucfirst($status);
-            $statusColor = match($status) {
+            $statusColor = match ($status) {
                 'approved' => '#28a745',
                 'denied' => '#dc3545',
                 'cancelled' => '#6c757d',
                 default => '#ffc107'
             };
-            
+
             $this->mail->Subject = "Reservation {$statusText} - Gymnasium Reservation System";
-            
+
             $body = "
             <!DOCTYPE html>
             <html>
@@ -100,10 +100,10 @@ class Mailer
             </body>
             </html>
             ";
-            
+
             $this->mail->Body = $body;
             $this->mail->AltBody = "Hello {$name}, Your reservation has been {$statusText}. Facility: {$reservationDetails['facility']}, Date: {$reservationDetails['date']}, Time: {$reservationDetails['start_time']} - {$reservationDetails['end_time']}";
-            
+
             $this->mail->send();
             return true;
         } catch (Exception $e) {
@@ -111,16 +111,16 @@ class Mailer
             return false;
         }
     }
-    
+
     public function sendWelcomeEmail($to, $name, $role)
     {
-        $to = "alihassansali@gmail.com"; // TEMPORARY USE
+        //$to = "alihassansali@gmail.com"; // TEMPORARY USE
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to, $name);
-            
+
             $this->mail->Subject = "Welcome to Gymnasium Reservation System";
-            
+
             $body = "
             <!DOCTYPE html>
             <html>
@@ -156,10 +156,10 @@ class Mailer
             </body>
             </html>
             ";
-            
+
             $this->mail->Body = $body;
             $this->mail->AltBody = "Welcome {$name}! Your account has been created with the role: " . ucfirst($role);
-            
+
             $this->mail->send();
             return true;
         } catch (Exception $e) {
@@ -173,9 +173,9 @@ class Mailer
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to, $adminName);
-            
+
             $this->mail->Subject = "New Reservation Request - Action Required";
-            
+
             $body = "
             <!DOCTYPE html>
             <html>
@@ -241,10 +241,10 @@ class Mailer
             </body>
             </html>
             ";
-            
+
             $this->mail->Body = $body;
             $this->mail->AltBody = "New reservation request from {$reservationDetails['user_name']} for {$reservationDetails['facility']} on {$reservationDetails['date']} at {$reservationDetails['start_time']} - {$reservationDetails['end_time']}. Purpose: {$reservationDetails['purpose']}";
-            
+
             $this->mail->send();
             return true;
         } catch (Exception $e) {
